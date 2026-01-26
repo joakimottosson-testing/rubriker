@@ -31,13 +31,13 @@ body{
   font-family:ABMonument,sans-serif;
 }
 
-/* OUTER WRAPPER — anchors top alignment */
+/* OUTER WRAPPER */
 .outer{
   position:relative;
   padding-top:24px;
 }
 
-/* MAIN COLUMN — true horizontal center */
+/* MAIN COLUMN — true center */
 .main{
   position:absolute;
   left:50%;
@@ -48,7 +48,7 @@ body{
 .sidebar{
   position:absolute;
   left:50%;
-  top:18px;                 /* <-- aligns RUBRIKER with the textarea top */
+  top:18px;
   transform:translateX(-420px);
   width:220px;
 
@@ -56,7 +56,6 @@ body{
   color:rgba(0,0,0,0.65);
 }
 
-/* SIDEBAR TEXT */
 .sidebar .title{
   font-size:32px;
   letter-spacing:0.12em;
@@ -135,29 +134,17 @@ textarea.xl{
   overflow-wrap:normal;
 }
 
-/* SIZES */
-textarea.regular{
-  font-size:44px;
-  height:calc(44px * 2);
-}
-textarea.large{
-  font-size:54px;
-}
-textarea.large[data-lines="2"]{
-  height:calc(54px * 2);
-}
-textarea.large[data-lines="3"]{
-  height:calc(54px * 3);
-}
-textarea.xl{
-  font-size:74px;
-}
-textarea.xl[data-lines="2"]{
-  height:calc(74px * 2);
-}
-textarea.xl[data-lines="3"]{
-  height:calc(74px * 3);
-}
+/* SIZES (max sizes; JS will shrink as needed) */
+textarea.regular{ font-size:44px; }
+textarea.regular[data-lines="2"]{ height:calc(44px * 2); }
+
+textarea.large{ font-size:54px; }
+textarea.large[data-lines="2"]{ height:calc(54px * 2); }
+textarea.large[data-lines="3"]{ height:calc(54px * 3); }
+
+textarea.xl{ font-size:74px; }
+textarea.xl[data-lines="2"]{ height:calc(74px * 2); }
+textarea.xl[data-lines="3"]{ height:calc(74px * 3); }
 
 /* DECKTEXT */
 .decktext{
@@ -193,7 +180,7 @@ textarea.xl[data-lines="3"]{
       <div>
         <div class="label">Regular · 2 rader</div>
         <div class="box regular-box box-gap">
-          <textarea class="regular"></textarea>
+          <textarea id="regular-2" class="regular" data-lines="2"></textarea>
         </div>
         <div class="deck-box">
           <textarea class="decktext" placeholder="nedryck"></textarea>
@@ -203,28 +190,28 @@ textarea.xl[data-lines="3"]{
       <div>
         <div class="label">Large · 2 rader</div>
         <div class="box">
-          <textarea class="large" data-lines="2"></textarea>
+          <textarea id="large-2" class="large" data-lines="2"></textarea>
         </div>
       </div>
 
       <div>
         <div class="label">Large · 3 rader</div>
         <div class="box">
-          <textarea class="large" data-lines="3"></textarea>
+          <textarea id="large-3" class="large" data-lines="3"></textarea>
         </div>
       </div>
 
       <div>
         <div class="label">XL · 2 rader</div>
         <div class="box">
-          <textarea class="xl" data-lines="2"></textarea>
+          <textarea id="xl-2" class="xl" data-lines="2"></textarea>
         </div>
       </div>
 
       <div>
         <div class="label">XL · 3 rader</div>
         <div class="box">
-          <textarea class="xl" data-lines="3"></textarea>
+          <textarea id="xl-3" class="xl" data-lines="3"></textarea>
         </div>
       </div>
 
@@ -233,23 +220,52 @@ textarea.xl[data-lines="3"]{
 </div>
 
 <script>
-function fit(el, max){
+function fit(el, { min = 16, max, precision = 0.25 }) {
   const w = el.clientWidth;
   const h = el.clientHeight;
-  let lo = 16, hi = max;
+  if (!w || !h) return;
 
-  while (hi - lo > 0.25) {
+  let lo = min;
+  let hi = max;
+
+  while (hi - lo > precision) {
     const mid = (lo + hi) / 2;
     el.style.fontSize = mid + 'px';
+
     if (el.scrollWidth <= w && el.scrollHeight <= h) lo = mid;
     else hi = mid;
   }
   el.style.fontSize = lo + 'px';
 }
 
-document.querySelectorAll('.regular').forEach(el => fit(el,44));
-document.querySelectorAll('.large').forEach(el => fit(el,54));
-document.querySelectorAll('.xl').forEach(el => fit(el,74));
+function attach(el, max){
+  const run = () => fit(el, { min: 16, max });
+  el.addEventListener('input', run);
+  window.addEventListener('resize', run);
+  run();
+}
+
+const configs = [
+  ['regular-2', 44],
+  ['large-2',   54],
+  ['large-3',   54],
+  ['xl-2',      74],
+  ['xl-3',      74],
+];
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    configs.forEach(([id, max]) => {
+      const el = document.getElementById(id);
+      if (el) attach(el, max);
+    });
+  });
+} else {
+  configs.forEach(([id, max]) => {
+    const el = document.getElementById(id);
+    if (el) attach(el, max);
+  });
+}
 </script>
 
 </body>
