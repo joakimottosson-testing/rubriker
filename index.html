@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rubrik – auto fit</title>
+<title>Rubriker – alpha</title>
 
 <link rel="preload"
       href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
@@ -17,7 +17,6 @@
   src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
   font-display: swap;
 }
-
 @font-face{
   font-family: ABMonumentRegular;
   src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Regular.woff2') format('woff2');
@@ -26,222 +25,231 @@
 
 /* PAGE */
 body{
-  font-family: ABMonument, sans-serif;
-  background: #fffec8;
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 24px;
+  margin:0;
+  background:#fffec8;
+  min-height:100vh;
+  font-family:ABMonument,sans-serif;
 }
 
-/* WRAPPER */
+/* OUTER WRAPPER — anchors top alignment */
+.outer{
+  position:relative;
+  padding-top:24px;
+}
+
+/* MAIN COLUMN — true horizontal center */
+.main{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+/* SIDEBAR — aligned with top of Regular textarea (not label) */
+.sidebar{
+  position:absolute;
+  left:50%;
+  top:18px;                 /* <-- aligns RUBRIKER with the textarea top */
+  transform:translateX(-420px);
+  width:220px;
+
+  font-family:"Courier New",Courier,monospace;
+  color:rgba(0,0,0,0.65);
+}
+
+/* SIDEBAR TEXT */
+.sidebar .title{
+  font-size:32px;
+  letter-spacing:0.12em;
+  line-height:1.1;
+}
+.sidebar .contact{
+  margin-top:10px;
+  font-size:13px;
+  font-style:italic;
+}
+.sidebar .contact a{
+  color:#005bd1;
+  text-decoration:none;
+}
+.sidebar .contact a:hover{
+  text-decoration:underline;
+}
+
+/* CONTENT STACK */
 .wrapper{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
-/* LABEL */
+/* LABELS */
 .label{
-  font-size: 13px;
-  color: #555;
-  margin: 0 0 4px 2px;
-  letter-spacing: 0.01em;
+  font-size:13px;
+  color:#555;
+  margin:0 0 4px 2px;
 }
 
-/* BOX – default (Large / XL) */
+/* BOXES */
 .box{
-  width: 375px;
-  background: #ffffff;
-  padding: 0 17px;
+  width:375px;
+  background:#fff;
+  padding:0 17px;
 }
-
-/* REGULAR: smalare, matchar gamla sajten */
 .box.regular-box{
-  width: 360px;
+  width:360px;
 }
-
-/* DECKTEXT: ännu smalare, matchar gamla nedryck */
 .deck-box{
-  width: 340px;
-  background: #ffffff;
-  padding: 0 17px;
+  width:340px;
+  background:#fff;
+  padding:0 17px;
 }
-
-/* spacing outside box = yellow */
 .box-gap{
-  margin-bottom: 10px;
+  margin-bottom:10px;
 }
 
-/* TEXTAREA – base */
+/* TEXTAREAS */
 textarea{
-  width: 100%;
-  font-family: ABMonument, sans-serif;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  width:100%;
+  font-family:ABMonument,sans-serif;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-0.02em;
 
-  padding: 0;
-  margin: 0;
-  border: none;
-  outline: none;
+  padding:0;
+  margin:0;
+  border:none;
+  outline:none;
 
-  resize: none;
-  overflow: hidden;
-  background: #ffffff;
-  color: #000000;
+  resize:none;
+  overflow:hidden;
+  background:#fff;
+  color:#000;
 }
 
-/* Match old word-wrapping behaviour */
+/* Word wrapping (legacy-correct) */
 textarea.regular,
 textarea.large,
 textarea.xl{
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: normal;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
 }
 
-/* REGULAR */
-textarea.regular{ font-size: 44px; }
-textarea.regular[data-lines="2"]{ height: calc(44px * 2); }
-
-/* LARGE */
-textarea.large{ font-size: 54px; }
-textarea.large[data-lines="2"]{ height: calc(54px * 2); }
-textarea.large[data-lines="3"]{ height: calc(54px * 3); }
-
-/* XL */
-textarea.xl{ font-size: 74px; }
-textarea.xl[data-lines="2"]{ height: calc(74px * 2); }
-textarea.xl[data-lines="3"]{ height: calc(74px * 3); }
+/* SIZES */
+textarea.regular{
+  font-size:44px;
+  height:calc(44px * 2);
+}
+textarea.large{
+  font-size:54px;
+}
+textarea.large[data-lines="2"]{
+  height:calc(54px * 2);
+}
+textarea.large[data-lines="3"]{
+  height:calc(54px * 3);
+}
+textarea.xl{
+  font-size:74px;
+}
+textarea.xl[data-lines="2"]{
+  height:calc(74px * 2);
+}
+textarea.xl[data-lines="3"]{
+  height:calc(74px * 3);
+}
 
 /* DECKTEXT */
 .decktext{
-  font-family: ABMonumentRegular, sans-serif;
-  font-size: 16px;
-  line-height: 1.2;
-  letter-spacing: normal;
-  height: calc(16px * 2.4);
+  font-family:ABMonumentRegular,sans-serif;
+  font-size:16px;
+  line-height:1.2;
+  height:calc(16px * 2.4);
 }
-
-/* decktext placeholder */
 .decktext::placeholder{
-  color: rgba(0,0,0,0.32);
-  font-style: normal;
-}
-
-/* FOOTER */
-.footer{
-  margin-top: 32px;
-  font-size: 11px;
-  color: rgba(0,0,0,0.45);
-  letter-spacing: 0.02em;
+  color:rgba(0,0,0,0.32);
 }
 </style>
 </head>
 
 <body>
 
-<div class="wrapper">
+<div class="outer">
 
-  <!-- REGULAR -->
-  <div>
-    <div class="label">Regular · 2 rader</div>
-
-    <div class="box regular-box box-gap">
-      <textarea id="regular-2" class="regular" data-lines="2"></textarea>
-    </div>
-
-    <div class="deck-box">
-      <textarea class="decktext" placeholder="nedryck"></textarea>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="title">RUBRIKER</div>
+    <div class="contact">
+      alpha v1.0.0<br>
+      contact:
+      <a href="mailto:joakim.ottosson@aftonbladet.se">Joakim Ottosson</a>
     </div>
   </div>
 
-  <div>
-    <div class="label">Large · 2 rader</div>
-    <div class="box">
-      <textarea id="large-2" class="large" data-lines="2"></textarea>
+  <!-- MAIN CONTENT (true center) -->
+  <div class="main">
+    <div class="wrapper">
+
+      <div>
+        <div class="label">Regular · 2 rader</div>
+        <div class="box regular-box box-gap">
+          <textarea class="regular"></textarea>
+        </div>
+        <div class="deck-box">
+          <textarea class="decktext" placeholder="nedryck"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">Large · 2 rader</div>
+        <div class="box">
+          <textarea class="large" data-lines="2"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">Large · 3 rader</div>
+        <div class="box">
+          <textarea class="large" data-lines="3"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">XL · 2 rader</div>
+        <div class="box">
+          <textarea class="xl" data-lines="2"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">XL · 3 rader</div>
+        <div class="box">
+          <textarea class="xl" data-lines="3"></textarea>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <div>
-    <div class="label">Large · 3 rader</div>
-    <div class="box">
-      <textarea id="large-3" class="large" data-lines="3"></textarea>
-    </div>
-  </div>
-
-  <div>
-    <div class="label">XL · 2 rader</div>
-    <div class="box">
-      <textarea id="xl-2" class="xl" data-lines="2"></textarea>
-    </div>
-  </div>
-
-  <div>
-    <div class="label">XL · 3 rader</div>
-    <div class="box">
-      <textarea id="xl-3" class="xl" data-lines="3"></textarea>
-    </div>
-  </div>
-
-</div>
-
-<div class="footer">
-  Created by: Joakim Ottosson
 </div>
 
 <script>
-function fit(el, { min = 16, max, precision = 0.25 }) {
+function fit(el, max){
   const w = el.clientWidth;
   const h = el.clientHeight;
-  if (!w || !h) return;
+  let lo = 16, hi = max;
 
-  let lo = min;
-  let hi = max;
-
-  while (hi - lo > precision) {
+  while (hi - lo > 0.25) {
     const mid = (lo + hi) / 2;
     el.style.fontSize = mid + 'px';
-
-    if (el.scrollWidth <= w && el.scrollHeight <= h) {
-      lo = mid;
-    } else {
-      hi = mid;
-    }
+    if (el.scrollWidth <= w && el.scrollHeight <= h) lo = mid;
+    else hi = mid;
   }
-
   el.style.fontSize = lo + 'px';
 }
 
-function attach(el, max){
-  const run = () => fit(el, { min: 16, max });
-  el.addEventListener('input', run);
-  window.addEventListener('resize', run);
-  run();
-}
-
-const configs = [
-  ['regular-2', 44],
-  ['large-2',   54],
-  ['large-3',   54],
-  ['xl-2',      74],
-  ['xl-3',      74],
-];
-
-if (document.fonts?.ready) {
-  document.fonts.ready.then(() => {
-    configs.forEach(([id, max]) =>
-      attach(document.getElementById(id), max)
-    );
-  });
-} else {
-  configs.forEach(([id, max]) =>
-    attach(document.getElementById(id), max)
-  );
-}
+document.querySelectorAll('.regular').forEach(el => fit(el,44));
+document.querySelectorAll('.large').forEach(el => fit(el,54));
+document.querySelectorAll('.xl').forEach(el => fit(el,74));
 </script>
 
 </body>
