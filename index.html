@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubrik – auto fit</title>
+
+<link rel="preload"
+      href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin>
+
+<style>
+@font-face{
+  font-family: ABMonument;
+  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face{
+  font-family: ABMonumentRegular;
+  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* PAGE */
+body{
+  font-family: ABMonument, sans-serif;
+  background: #fffec8;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 24px;
+}
+
+/* WRAPPER */
+.wrapper{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* LABEL */
+.label{
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 4px 2px;
+  letter-spacing: 0.01em;
+}
+
+/* BOX – default (Large / XL) */
+.box{
+  width: 375px;
+  background: #ffffff;
+  padding: 0 17px;
+}
+
+/* REGULAR: smalare, matchar gamla sajten */
+.box.regular-box{
+  width: 360px; /* ← kritisk justering */
+}
+
+/* spacing outside box = yellow */
+.box-gap{
+  margin-bottom: 10px;
+}
+
+/* TEXTAREA – base */
+textarea{
+  width: 100%;
+  font-family: ABMonument, sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+
+  resize: none;
+  overflow: hidden;
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Match old word-wrapping behaviour */
+textarea.regular,
+textarea.large,
+textarea.xl{
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* REGULAR */
+textarea.regular{ font-size: 44px; }
+textarea.regular[data-lines="2"]{ height: calc(44px * 2); }
+
+/* LARGE */
+textarea.large{ font-size: 54px; }
+textarea.large[data-lines="2"]{ height: calc(54px * 2); }
+textarea.large[data-lines="3"]{ height: calc(54px * 3); }
+
+/* XL */
+textarea.xl{ font-size: 74px; }
+textarea.xl[data-lines="2"]{ height: calc(74px * 2); }
+textarea.xl[data-lines="3"]{ height: calc(74px * 3); }
+
+/* DECKTEXT */
+.decktext{
+  font-family: ABMonumentRegular, sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: normal;
+  height: calc(16px * 2.4);
+}
+
+/* decktext placeholder */
+.decktext::placeholder{
+  color: rgba(0,0,0,0.32);
+  font-style: normal;
+}
+
+/* FOOTER */
+.footer{
+  margin-top: 32px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.45);
+  letter-spacing: 0.02em;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <!-- REGULAR -->
+  <div>
+    <div class="label">Regular · 2 rader</div>
+
+    <div class="box regular-box box-gap">
+      <textarea id="regular-2" class="regular" data-lines="2"></textarea>
+    </div>
+
+    <div class="box">
+      <textarea class="decktext" placeholder="nedryck"></textarea>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Large · 2 rader</div>
+    <div class="box">
+      <textarea id="large-2" class="large" data-lines="2"></textarea>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Large · 3 rader</div>
+    <div class="box">
+      <textarea id="large-3" class="large" data-lines="3"></textarea>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">XL · 2 rader</div>
+    <div class="box">
+      <textarea id="xl-2" class="xl" data-lines="2"></textarea>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">XL · 3 rader</div>
+    <div class="box">
+      <textarea id="xl-3" class="xl" data-lines="3"></textarea>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Created by: Joakim Ottosson
+</div>
+
+<script>
+function fit(el, { min = 16, max, precision = 0.25 }) {
+  const w = el.clientWidth;
+  const h = el.clientHeight;
+  if (!w || !h) return;
+
+  let lo = min;
+  let hi = max;
+
+  while (hi - lo > precision) {
+    const mid = (lo + hi) / 2;
+    el.style.fontSize = mid + 'px';
+
+    if (el.scrollWidth <= w && el.scrollHeight <= h) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+
+  el.style.fontSize = lo + 'px';
+}
+
+function attach(el, max){
+  const run = () => fit(el, { min: 16, max });
+  el.addEventListener('input', run);
+  window.addEventListener('resize', run);
+  run();
+}
+
+const configs = [
+  ['regular-2', 44],
+  ['large-2',   54],
+  ['large-3',   54],
+  ['xl-2',      74],
+  ['xl-3',      74],
+];
+
+if (document.fonts?.ready) {
+  document.fonts.ready.then(() => {
+    configs.forEach(([id, max]) =>
+      attach(document.getElementById(id), max)
+    );
+  });
+} else {
+  configs.forEach(([id, max]) =>
+    attach(document.getElementById(id), max)
+  );
+}
+</script>
+
+</body>
+</html>
