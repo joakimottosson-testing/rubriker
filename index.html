@@ -60,7 +60,14 @@ body{
 
 /* REGULAR: smalare, matchar gamla sajten */
 .box.regular-box{
-  width: 360px; /* ← kritisk justering */
+  width: 360px;
+}
+
+/* DECKTEXT: ännu smalare, matchar gamla nedryck */
+.deck-box{
+  width: 340px;
+  background: #ffffff;
+  padding: 0 17px;
 }
 
 /* spacing outside box = yellow */
@@ -147,7 +154,7 @@ textarea.xl[data-lines="3"]{ height: calc(74px * 3); }
       <textarea id="regular-2" class="regular" data-lines="2"></textarea>
     </div>
 
-    <div class="box">
+    <div class="deck-box">
       <textarea class="decktext" placeholder="nedryck"></textarea>
     </div>
   </div>
