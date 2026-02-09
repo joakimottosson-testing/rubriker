@@ -3,7 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rubriker – alpha</title>
+
+<!-- Bookmark/tab name -->
+<title>rubrikgranskare</title>
+
+<!-- Favicon (pen icon) -->
+<link rel="icon" type="image/svg+xml"
+      href='data:image/svg+xml;utf8,
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="%23000000"/>
+  <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
+  <path d="M40 14l10 10" stroke="%23000000" stroke-width="4" stroke-linecap="round"/>
+  <path d="M18 46l8-2-6-6-2 8z" fill="%23cfcfcf"/>
+</svg>'>
 
 <link rel="preload"
       href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
@@ -23,7 +35,6 @@
   font-display: swap;
 }
 
-/* PAGE */
 body{
   margin:0;
   background:#fffec8;
@@ -31,27 +42,23 @@ body{
   font-family:ABMonument,sans-serif;
 }
 
-/* OUTER WRAPPER */
 .outer{
   position:relative;
   padding-top:24px;
 }
 
-/* MAIN COLUMN — true center */
 .main{
   position:absolute;
   left:50%;
   transform:translateX(-50%);
 }
 
-/* SIDEBAR — aligned with top of Regular textarea (not label) */
 .sidebar{
   position:absolute;
   left:50%;
   top:18px;
   transform:translateX(-520px);
   width:220px;
-
   font-family:"Courier New",Courier,monospace;
   color:rgba(0,0,0,0.65);
 }
@@ -74,58 +81,56 @@ body{
   text-decoration:underline;
 }
 
-/* CONTENT STACK */
 .wrapper{
   display:flex;
   flex-direction:column;
   gap:20px;
 }
 
-/* LABELS */
 .label{
   font-size:13px;
   color:#555;
   margin:0 0 4px 2px;
 }
 
-/* BOXES */
 .box{
   width:375px;
   background:#fff;
-  padding:0 17px;
+  padding:0 4px;
 }
 .box.regular-box{
   width:360px;
 }
+
 .deck-box{
   width:340px;
   background:#fff;
-  padding:0 17px;
+  padding:0 4px;
 }
+
 .box-gap{
   margin-bottom:10px;
 }
+.deck-gap{
+  margin-top:10px;
+}
 
-/* TEXTAREAS */
 textarea{
   width:100%;
   font-family:ABMonument,sans-serif;
   font-weight:800;
   line-height:1;
   letter-spacing:-0.02em;
-
   padding:0;
   margin:0;
   border:none;
   outline:none;
-
   resize:none;
   overflow:hidden;
   background:#fff;
   color:#000;
 }
 
-/* Word wrapping (legacy-correct) */
 textarea.regular,
 textarea.large,
 textarea.xl{
@@ -134,19 +139,31 @@ textarea.xl{
   overflow-wrap:normal;
 }
 
-/* SIZES (max sizes; JS will shrink as needed) */
-textarea.regular{ font-size:44px; }
-textarea.regular[data-lines="2"]{ height:calc(44px * 2); }
+textarea.regular{
+  font-size:44px;
+  height:calc(44px * 2);
+}
 
-textarea.large{ font-size:54px; }
-textarea.large[data-lines="2"]{ height:calc(54px * 2); }
-textarea.large[data-lines="3"]{ height:calc(54px * 3); }
+textarea.large{
+  font-size:54px;
+}
+textarea.large[data-lines="2"]{
+  height:calc(54px * 2);
+}
+textarea.large[data-lines="3"]{
+  height:calc(54px * 3);
+}
 
-textarea.xl{ font-size:74px; }
-textarea.xl[data-lines="2"]{ height:calc(74px * 2); }
-textarea.xl[data-lines="3"]{ height:calc(74px * 3); }
+textarea.xl{
+  font-size:74px;
+}
+textarea.xl[data-lines="2"]{
+  height:calc(74px * 2);
+}
+textarea.xl[data-lines="3"]{
+  height:calc(74px * 3);
+}
 
-/* DECKTEXT */
 .decktext{
   font-family:ABMonumentRegular,sans-serif;
   font-size:16px;
@@ -163,27 +180,25 @@ textarea.xl[data-lines="3"]{ height:calc(74px * 3); }
 
 <div class="outer">
 
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="title">RUBRIK-<br>GRANSKARE</div>
     <div class="contact">
-      beta v1.0<br>
+      beta v1.1<br>
       contact:
       <a href="mailto:joakim.ottosson@aftonbladet.se">Joakim Ottosson</a>
     </div>
   </div>
 
-  <!-- MAIN CONTENT (true center) -->
   <div class="main">
     <div class="wrapper">
 
       <div>
         <div class="label">Regular · 2 rader</div>
         <div class="box regular-box box-gap">
-          <textarea id="regular-2" class="regular" data-lines="2"></textarea>
+          <textarea id="regular-2" class="regular"></textarea>
         </div>
         <div class="deck-box">
-          <textarea class="decktext" placeholder="nedryck"></textarea>
+          <textarea id="deck-1" class="decktext" placeholder="nedryck"></textarea>
         </div>
       </div>
 
@@ -192,12 +207,18 @@ textarea.xl[data-lines="3"]{ height:calc(74px * 3); }
         <div class="box">
           <textarea id="large-2" class="large" data-lines="2"></textarea>
         </div>
+        <div class="deck-box deck-gap">
+          <textarea id="deck-2" class="decktext" placeholder="nedryck"></textarea>
+        </div>
       </div>
 
       <div>
         <div class="label">Large · 3 rader</div>
         <div class="box">
           <textarea id="large-3" class="large" data-lines="3"></textarea>
+        </div>
+        <div class="deck-box deck-gap">
+          <textarea id="deck-3" class="decktext" placeholder="nedryck"></textarea>
         </div>
       </div>
 
@@ -231,7 +252,6 @@ function fit(el, { min = 16, max, precision = 0.25 }) {
   while (hi - lo > precision) {
     const mid = (lo + hi) / 2;
     el.style.fontSize = mid + 'px';
-
     if (el.scrollWidth <= w && el.scrollHeight <= h) lo = mid;
     else hi = mid;
   }
@@ -266,6 +286,25 @@ if (document.fonts && document.fonts.ready) {
     if (el) attach(el, max);
   });
 }
+
+/* sync all nedryck fields */
+(function syncDeck(){
+  const decks = [
+    document.getElementById('deck-1'),
+    document.getElementById('deck-2'),
+    document.getElementById('deck-3')
+  ];
+
+  decks.forEach(src => {
+    src.addEventListener('input', () => {
+      decks.forEach(dst => {
+        if (dst !== src && dst.value !== src.value) {
+          dst.value = src.value;
+        }
+      });
+    });
+  });
+})();
 </script>
 
 </body>
