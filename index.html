@@ -4,19 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Bookmark/tab name -->
 <title>rubrikgranskare</title>
 
-<!-- Favicon (pen icon) -->
+<!-- Favicon -->
 <link rel="icon" type="image/svg+xml"
       href='data:image/svg+xml;utf8,
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="%23000000"/>
   <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
-  <path d="M40 14l10 10" stroke="%23000000" stroke-width="4" stroke-linecap="round"/>
-  <path d="M18 46l8-2-6-6-2 8z" fill="%23cfcfcf"/>
 </svg>'>
 
+<!-- Fonts -->
 <link rel="preload"
       href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
       as="font"
@@ -77,9 +75,6 @@ body{
   color:#005bd1;
   text-decoration:none;
 }
-.sidebar .contact a:hover{
-  text-decoration:underline;
-}
 
 .wrapper{
   display:flex;
@@ -108,12 +103,8 @@ body{
   padding:0 4px;
 }
 
-.box-gap{
-  margin-bottom:10px;
-}
-.deck-gap{
-  margin-top:10px;
-}
+.box-gap{ margin-bottom:10px; }
+.deck-gap{ margin-top:10px; }
 
 textarea{
   width:100%;
@@ -174,6 +165,12 @@ textarea.xl[data-lines="3"]{
   color:rgba(0,0,0,0.32);
 }
 </style>
+
+<!-- Analytics: Plausible (correct for /rubriker) -->
+<script defer
+        data-domain="joakimottosson-testing.github.io/rubriker"
+        src="https://plausible.io/js/script.js"></script>
+
 </head>
 
 <body>
@@ -183,9 +180,8 @@ textarea.xl[data-lines="3"]{
   <div class="sidebar">
     <div class="title">RUBRIK-<br>GRANSKARE</div>
     <div class="contact">
-      beta v1.1<br>
-      contact:
-      <a href="mailto:joakim.ottosson@aftonbladet.se">Joakim Ottosson</a>
+      beta v1.0<br>
+      Joakim Ottosson
     </div>
   </div>
 
@@ -265,42 +261,27 @@ function attach(el, max){
   run();
 }
 
-const configs = [
-  ['regular-2', 44],
-  ['large-2',   54],
-  ['large-3',   54],
-  ['xl-2',      74],
-  ['xl-3',      74],
-];
+[
+  ['regular-2',44],
+  ['large-2',54],
+  ['large-3',54],
+  ['xl-2',74],
+  ['xl-3',74]
+].forEach(([id,max])=>{
+  const el=document.getElementById(id);
+  if(el) attach(el,max);
+});
 
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    configs.forEach(([id, max]) => {
-      const el = document.getElementById(id);
-      if (el) attach(el, max);
-    });
-  });
-} else {
-  configs.forEach(([id, max]) => {
-    const el = document.getElementById(id);
-    if (el) attach(el, max);
-  });
-}
-
-/* sync all nedryck fields */
 (function syncDeck(){
-  const decks = [
+  const decks=[
     document.getElementById('deck-1'),
     document.getElementById('deck-2'),
     document.getElementById('deck-3')
   ];
-
-  decks.forEach(src => {
-    src.addEventListener('input', () => {
-      decks.forEach(dst => {
-        if (dst !== src && dst.value !== src.value) {
-          dst.value = src.value;
-        }
+  decks.forEach(src=>{
+    src.addEventListener('input',()=>{
+      decks.forEach(dst=>{
+        if(dst!==src) dst.value=src.value;
       });
     });
   });
