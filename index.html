@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Rubrikgranskare – Beta 2.0</title>
-<!-- Favicon -->
-<link rel="icon" type="image/svg+xml"
-      href='data:image/svg+xml;utf8,
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="%23000000"/>
-  <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
-</svg>'>
+  <title>Rubrikgranskare – Beta 2.1</title>
+  <!-- Favicon: pennikonen från originalversionen. -->
+  <link rel="icon" type="image/svg+xml"
+        href='data:image/svg+xml;utf8,
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <rect width="64" height="64" rx="12" fill="%23000000"/>
+    <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
+  </svg>'>
   <style>
   /* Typsnitt: externa filer som behövs för korrekta radbrytningar. */
   @font-face {
@@ -360,47 +360,7 @@
     line-height: 1.4;
   }
 
-  @media(max-width:850px) {
-    .layout {
-      grid-template-columns: 383px minmax(375px,1fr);
-      gap: 20px;
-    }
-
-    .preview-area {
-      position: static;
-    }
-
-  }
-
-  @media(max-width:800px) {
-    .layout {
-      display: block;
-      padding: 16px;
-      margin: 0;
-    }
-
-    .sidebar {
-      margin-bottom: 24px;
-    }
-
-    .wrapper {
-      margin-bottom: 28px;
-    }
-
-    .box,.box.regular-box {
-      max-width: 100%;
-      width: 375px;
-    }
-
-    .deck-box {
-      max-width: 100%;
-    }
-
-    .preview-area {
-      position: static;
-    }
-
-  }
+  /* Ingen responsiv omflyttning: förhandsvisningen stannar alltid till höger. */
 
   /* Ett diskret plus vid varje format öppnar ett extra rubrikförslag. */
   .format-heading {
