@@ -1,298 +1,961 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>rubrikgranskare</title>
-
-<!-- Favicon -->
-<link rel="icon" type="image/svg+xml"
-      href='data:image/svg+xml;utf8,
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="%23000000"/>
-  <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
-</svg>'>
-
-<!-- Fonts -->
-<link rel="preload"
-      href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin>
-
-<style>
-@font-face{
-  font-family: ABMonument;
-  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
-  font-display: swap;
-}
-@font-face{
-  font-family: ABMonumentRegular;
-  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Regular.woff2') format('woff2');
-  font-display: swap;
-}
-
-body{
-  margin:0;
-  background:#fffec8;
-  min-height:100vh;
-  font-family:ABMonument,sans-serif;
-}
-
-.outer{
-  position:relative;
-  padding-top:24px;
-}
-
-.main{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.sidebar{
-  position:absolute;
-  left:50%;
-  top:18px;
-  transform:translateX(-520px);
-  width:220px;
-  font-family:"Courier New",Courier,monospace;
-  color:rgba(0,0,0,0.65);
-}
-
-.sidebar .title{
-  font-size:32px;
-  letter-spacing:0.12em;
-  line-height:1.1;
-}
-.sidebar .contact{
-  margin-top:10px;
-  font-size:13px;
-  font-style:italic;
-}
-.sidebar .contact a{
-  color:#005bd1;
-  text-decoration:none;
-}
-
-.wrapper{
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-.label{
-  font-size:13px;
-  color:#555;
-  margin:0 0 4px 2px;
-}
-
-.box{
-  width:375px;
-  background:#fff;
-  padding:0 4px;
-}
-.box.regular-box{
-  width:360px;
-}
-
-.deck-box{
-  width:340px;
-  background:#fff;
-  padding:0 4px;
-}
-
-.box-gap{ margin-bottom:10px; }
-.deck-gap{ margin-top:10px; }
-
-textarea{
-  width:100%;
-  font-family:ABMonument,sans-serif;
-  font-weight:800;
-  line-height:1;
-  letter-spacing:-0.02em;
-  padding:0;
-  margin:0;
-  border:none;
-  outline:none;
-  resize:none;
-  overflow:hidden;
-  background:#fff;
-  color:#000;
-}
-
-textarea.regular,
-textarea.large,
-textarea.xl{
-  white-space:normal;
-  word-break:normal;
-  overflow-wrap:normal;
-}
-
-textarea.regular{
-  font-size:44px;
-  height:calc(44px * 2);
-}
-
-textarea.large{
-  font-size:54px;
-}
-textarea.large[data-lines="2"]{
-  height:calc(54px * 2);
-}
-textarea.large[data-lines="3"]{
-  height:calc(54px * 3);
-}
-
-textarea.xl{
-  font-size:74px;
-}
-textarea.xl[data-lines="2"]{
-  height:calc(74px * 2);
-}
-textarea.xl[data-lines="3"]{
-  height:calc(74px * 3);
-}
-
-.decktext{
-  font-family:ABMonumentRegular,sans-serif;
-  font-size:16px;
-  line-height:1.2;
-  height:calc(16px * 2.4);
-}
-.decktext::placeholder{
-  color:rgba(0,0,0,0.32);
-}
-</style>
-
-<!-- Analytics: Plausible (correct for /rubriker) -->
-<script defer
-        data-domain="joakimottosson-testing.github.io/rubriker"
-        src="https://plausible.io/js/script.js"></script>
-
-
-
-</head>
-
-<body>
-
-<div class="outer">
-
-  <div class="sidebar">
-    <div class="title">RUBRIK-<br>GRANSKARE</div>
-    <div class="contact">
-      Beta 1.1<br>
-
-
-        Contact:
-  <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a>
-
-    </div>
-  </div>
-
-  <div class="main">
-    <div class="wrapper">
-
-      <div>
-        <div class="label">Regular · 2 rader</div>
-        <div class="box regular-box box-gap">
-          <textarea id="regular-2" class="regular"></textarea>
-        </div>
-        <div class="deck-box">
-          <textarea id="deck-1" class="decktext" placeholder="nedryck"></textarea>
-        </div>
-      </div>
-
-      <div>
-        <div class="label">Large · 2 rader</div>
-        <div class="box">
-          <textarea id="large-2" class="large" data-lines="2"></textarea>
-        </div>
-        <div class="deck-box deck-gap">
-          <textarea id="deck-2" class="decktext" placeholder="nedryck"></textarea>
-        </div>
-      </div>
-
-      <div>
-        <div class="label">Large · 3 rader</div>
-        <div class="box">
-          <textarea id="large-3" class="large" data-lines="3"></textarea>
-        </div>
-        <div class="deck-box deck-gap">
-          <textarea id="deck-3" class="decktext" placeholder="nedryck"></textarea>
-        </div>
-      </div>
-
-      <div>
-        <div class="label">XL · 2 rader</div>
-        <div class="box">
-          <textarea id="xl-2" class="xl" data-lines="2"></textarea>
-        </div>
-      </div>
-
-      <div>
-        <div class="label">XL · 3 rader</div>
-        <div class="box">
-          <textarea id="xl-3" class="xl" data-lines="3"></textarea>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-function fit(el, { min = 16, max, precision = 0.25 }) {
-  const w = el.clientWidth;
-  const h = el.clientHeight;
-  if (!w || !h) return;
-
-  let lo = min;
-  let hi = max;
-
-  while (hi - lo > precision) {
-    const mid = (lo + hi) / 2;
-    el.style.fontSize = mid + 'px';
-    if (el.scrollWidth <= w && el.scrollHeight <= h) lo = mid;
-    else hi = mid;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rubrikgranskare – Beta 2.0</title>
+  <style>
+  /* Typsnitt: externa filer som behövs för korrekta radbrytningar. */
+  @font-face {
+    font-family: ABMonument;
+    src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
+    font-display: swap;
   }
-  el.style.fontSize = lo + 'px';
-}
 
-function attach(el, max){
-  const run = () => fit(el, { min: 16, max });
-  el.addEventListener('input', run);
-  window.addEventListener('resize', run);
-  run();
-}
+  @font-face {
+    font-family: ABMonumentRegular;
+    src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Regular.woff2') format('woff2');
+    font-display: swap;
+  }
 
-[
-  ['regular-2',44],
-  ['large-2',54],
-  ['large-3',54],
-  ['xl-2',74],
-  ['xl-3',74]
-].forEach(([id,max])=>{
-  const el=document.getElementById(id);
-  if(el) attach(el,max);
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: #fffec8;
+    color: #000;
+    font-family: ABMonument,sans-serif;
+  }
+
+  /* Huvudlayout: rubrikfält till vänster och puff till höger. */
+  .layout {
+    display: grid;
+    grid-template-columns: 383px minmax(380px,620px);
+    gap: 24px 34px;
+    max-width: 1060px;
+    margin: 24px auto;
+    padding: 0 22px;
+    align-items: start;
+  }
+
+  .sidebar {
+    grid-column: 1/-1;
+    font-family: 'Courier New',monospace;
+    color: #555;
+  }
+
+  /* När förhandsvisningen är stängd blir verktyget smalt och centrerat. */
+  /* Låt högerspaltens rubrik vara synlig även när puffen är infälld. */
+  .layout.preview-collapsed {
+    grid-template-columns: 383px minmax(380px,620px);
+  }
+
+  /* Reglaget sitter på samma rad som puffens etikett. Av är standard. */
+  .preview-control {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 4px 2px;
+    font: 13px Arial,sans-serif;
+    color: #555;
+  }
+
+  .preview-status {
+    min-width: 16px;
+  }
+
+  .preview-toggle {
+    width: 40px;
+    height: 23px;
+    padding: 3px;
+    border: 0;
+    border-radius: 999px;
+    background: #a3a3a3;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: background-color .15s ease;
+  }
+
+  .preview-toggle[aria-checked="true"] {
+    background: #238a61;
+    justify-content: flex-end;
+  }
+
+  .preview-toggle-knob {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #fff;
+    display: block;
+  }
+
+  .preview-toggle:focus-visible {
+    outline: 2px solid #555;
+    outline-offset: 3px;
+  }
+
+  .preview[hidden] {
+    display: none;
+  }
+
+  .sidebar .title {
+    font-size: 32px;
+    letter-spacing: .06em;
+    line-height: 1.1;
+  }
+
+  .contact {
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .contact a {
+    color: #005bd1;
+    text-decoration: none;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .label {
+    font: 13px Arial,sans-serif;
+    color: #555;
+    margin: 0 0 4px 2px;
+  }
+
+  .box {
+    width: 375px;
+    background: #fff;
+    padding: 0 4px;
+  }
+
+  .box.regular-box {
+    width: 360px;
+  }
+
+  .deck-box {
+    width: 340px;
+    background: #fff;
+    padding: 0 4px;
+  }
+
+  .box-gap {
+    margin-bottom: 10px;
+  }
+
+  .deck-gap {
+    margin-top: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-family: ABMonument,sans-serif;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.02em;
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    background: #fff;
+    color: #000;
+  }
+
+  textarea.regular,textarea.large,textarea.xl {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  textarea.regular {
+    font-size: 44px;
+    height: 88px;
+  }
+
+  textarea.large {
+    font-size: 54px;
+  }
+
+  textarea.large[data-lines="2"] {
+    height: 108px;
+  }
+
+  textarea.large[data-lines="3"] {
+    height: 162px;
+  }
+
+  textarea.xl {
+    font-size: 74px;
+  }
+
+  textarea.xl[data-lines="2"] {
+    height: 148px;
+  }
+
+  textarea.xl[data-lines="3"] {
+    height: 222px;
+  }
+
+  .decktext {
+    font-family: ABMonumentRegular,sans-serif;
+    font-size: 16px;
+    line-height: 1.2;
+    height: 38.4px;
+  }
+
+  .decktext::placeholder {
+    color: #aaa;
+    font-style: italic;
+  }
+
+  /* Sticky: puffen syns när redaktören scrollar mellan rubrikfälten. */
+  .preview-area {
+    position: sticky;
+    top: 24px;
+    min-width: 0;
+  }
+
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    font: 13px Arial,sans-serif;
+    color: #555;
+  }
+
+  .preview-header select {
+    padding: 7px;
+    border: 1px solid #bbb;
+    background: white;
+    border-radius: 3px;
+  }
+
+  .dropzone {
+    border: 2px dashed #999;
+    background: #fffde6;
+    padding: 14px;
+    text-align: center;
+    font: 14px Arial,sans-serif;
+    cursor: pointer;
+    margin-bottom: 18px;
+  }
+
+  .empty-image.drag {
+    background: #fff2a3;
+  }
+
+  .dropzone input {
+    display: none;
+  }
+
+  /* Mobilpuffen är 375 px bred. */
+  .preview {
+    background: #fff;
+    width: 375px;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .preview img[hidden],.empty-image[hidden] {
+    display: none;
+  }
+
+  /* Forhandsvisningens text ar endast till for att lasa.
+     Muspekaren ska inte visa en textmarkor och texten ska inte
+     kunna markeras eller ge intryck av att vara redigerbar. */
+  .preview-copy {
+    padding: 12px 4px 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .preview-title,.preview-deck {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  .preview-title {
+    font-family: ABMonument,sans-serif;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1;
+    overflow-wrap: normal;
+    white-space: pre-wrap;
+  }
+
+  .preview-deck {
+    font-family: ABMonumentRegular,Arial,sans-serif;
+    font-size: 16px;
+    line-height: 1.2;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  .empty-image {
+    cursor: pointer;
+    text-align: center;
+    padding: 12px;
+    background: #eee;
+    aspect-ratio: 1500/549;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 14px Arial,sans-serif;
+    color: #aaa;
+  }
+
+  .remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,.78);
+    color: #fff;
+    font: 24px Arial,sans-serif;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .remove-image[hidden] {
+    display: none;
+  }
+
+  .preview-note {
+    font: 12px Arial,sans-serif;
+    color: #666;
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+
+  @media(max-width:850px) {
+    .layout {
+      grid-template-columns: 383px minmax(375px,1fr);
+      gap: 20px;
+    }
+
+    .preview-area {
+      position: static;
+    }
+
+  }
+
+  @media(max-width:800px) {
+    .layout {
+      display: block;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .sidebar {
+      margin-bottom: 24px;
+    }
+
+    .wrapper {
+      margin-bottom: 28px;
+    }
+
+    .box,.box.regular-box {
+      max-width: 100%;
+      width: 375px;
+    }
+
+    .deck-box {
+      max-width: 100%;
+    }
+
+    .preview-area {
+      position: static;
+    }
+
+  }
+
+  /* Ett diskret plus vid varje format öppnar ett extra rubrikförslag. */
+  .format-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Storre klickyta (ca 40 x 44 px) utan att plus/minus flyttas.
+     Negativa marginaler tar ut den extra paddingen, sa layouten
+     och symbolens visuella placering blir desamma som tidigare. */
+  .variant-button {
+    padding: 12px 14px 12px 6px;
+    margin: -12px -11px -12px -6px;
+    border: 0;
+    background: transparent;
+    color: #555;
+    font: 20px/1 Arial,sans-serif;
+    cursor: pointer;
+  }
+  .variant-button:hover {
+    color:#000;
+  }
+  .variant-button:focus-visible { outline:2px solid #555; outline-offset:2px; }
+  /* Alternativet fälls ut mjukt, utan att fördröja redigeringen.
+     Grid-rader ger en korrekt höjd även om rubriken ändras. */
+  .alternative-block {
+    display: grid;
+    grid-template-rows: 0fr;
+    margin-top: 0;
+    transition: grid-template-rows 130ms ease-out, margin-top 130ms ease-out;
+  }
+  .alternative-block.is-open {
+    grid-template-rows: 1fr;
+    margin-top: 14px;
+  }
+  .alternative-block-inner {
+    min-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transition: visibility 0s linear 130ms;
+  }
+  .alternative-block.is-open .alternative-block-inner {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  /* Bara etiketten Alternativ ligger på en diskret gul platta.
+     Inga gula kanter på sidorna eller under rubrikfälten. */
+  .alternative-block-inner {
+    background: transparent;
+    padding: 0;
+    border: 0;
+  }
+  .alternative-block-inner > .label {
+    background: #fff4b8;
+    color: #555;
+    width: 375px;
+    max-width: 100%;
+    padding: 6px 4px;
+    margin: 0 0 8px;
+  }
+  /* Regular har en smalare rubrikruta (360 px). Plattan följer samma bredd. */
+  .alternative-block-inner.regular-alternative > .label {
+    width: 360px;
+  }
+  .alternative-block-inner .box,
+  .alternative-block-inner .deck-box {
+    max-width: 100%;
+  }
+
+  /* Respektera Chromes inställning för minskad rörelse. */
+  @media (prefers-reduced-motion:reduce) {
+    .alternative-block,
+    .alternative-block-inner {
+      transition:none;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="layout preview-collapsed" id="layout">
+  <aside class="sidebar">
+   <div class="title">
+    RUBRIKGRANSKARE
+   </div>
+   <div class="contact">
+    Beta 2.0 Contact:
+    <a href="mailto:joakim.ottosson@schibsted.com">
+     Joakim Ottosson
+    </a>
+   </div>
+  </aside>
+  <main class="wrapper">
+   <div>
+    <div class="label">
+     Regular · 2 rader
+    </div>
+    <div class="box regular-box box-gap">
+     <textarea class="regular" id="regular-2"></textarea>
+    </div>
+    <div class="deck-box">
+     <textarea class="decktext" id="deck-1" placeholder="nedryck"></textarea>
+    </div>
+   </div>
+   <div>
+    <div class="label">
+     Large · 2 rader
+    </div>
+    <div class="box">
+     <textarea class="large" data-lines="2" id="large-2"></textarea>
+    </div>
+    <div class="deck-box deck-gap">
+     <textarea class="decktext" id="deck-2" placeholder="nedryck"></textarea>
+    </div>
+   </div>
+   <div>
+    <div class="label">
+     Large · 3 rader
+    </div>
+    <div class="box">
+     <textarea class="large" data-lines="3" id="large-3"></textarea>
+    </div>
+    <div class="deck-box deck-gap">
+     <textarea class="decktext" id="deck-3" placeholder="nedryck"></textarea>
+    </div>
+   </div>
+   <div>
+    <div class="label">
+     XL · 2 rader
+    </div>
+    <div class="box">
+     <textarea class="xl" data-lines="2" id="xl-2"></textarea>
+    </div>
+    <div class="deck-box deck-gap">
+     <textarea class="decktext" id="deck-4" placeholder="nedryck"></textarea>
+    </div>
+   </div>
+   <div>
+    <div class="label">
+     XL · 3 rader
+    </div>
+    <div class="box">
+     <textarea class="xl" data-lines="3" id="xl-3"></textarea>
+    </div>
+    <div class="deck-box deck-gap">
+     <textarea class="decktext" id="deck-5" placeholder="nedryck"></textarea>
+    </div>
+   </div>
+  </main>
+  <section class="preview-area" id="preview-area">
+   <div class="preview-control">
+    <span id="preview-label">Puff · förhandsvisning</span>
+    <span class="preview-status" id="preview-status" aria-hidden="true">Av</span>
+    <button type="button" class="preview-toggle" id="toggle-preview"
+            role="switch" aria-label="Förhandsvisning" aria-checked="false"
+            aria-controls="preview" title="Slå på eller av förhandsvisning">
+     <span class="preview-toggle-knob" aria-hidden="true"></span>
+    </button>
+   </div>
+   <div class="preview" id="preview" hidden>
+    <button aria-label="Ta bort bilden" class="remove-image" hidden="" id="remove-image" title="Ta bort bilden" type="button">
+     ×
+    </button>
+    <label class="empty-image" for="image-file" id="empty-image">
+     Klicka eller dra in bild
+    </label>
+    <input accept="image/*" hidden="" id="image-file" type="file"/>
+    <img alt="Vald puffbild" hidden="" id="preview-image"/>
+    <div class="preview-copy">
+     <div class="preview-title" id="preview-title"></div>
+     <div class="preview-deck" id="preview-deck"></div>
+    </div>
+   </div>
+  </section>
+ </div>
+<script>
+// ============================================================
+// 1. INSTÄLLNINGAR FÖR RUBRIKFÄLTEN
+// Ändra maxstorleken här om ett rubrikformat ska bli större
+// eller mindre. Minsta tillåtna storlek är 16 pixlar.
+// ============================================================
+const headlineFormats = [
+  { id: 'regular-2', maxSize: 44 },
+  { id: 'large-2',   maxSize: 54 },
+  { id: 'large-3',   maxSize: 54 },
+  { id: 'xl-2',      maxSize: 74 },
+  { id: 'xl-3',      maxSize: 74 }
+];
+
+const headlineIds = headlineFormats.map(format => format.id);
+const deckFields = [1, 2, 3, 4, 5].map(number =>
+  document.getElementById(`deck-${number}`)
+);
+
+// ============================================================
+// EXTRA RUBRIKFÖRSLAG
+// Varje format kan visa ett extra rubrikfält och ett eget nedryck.
+// Alternativet behåller sin text när det fälls ihop. När man
+// stänger det aktiva alternativet återgår puffen till originalet.
+// ============================================================
+headlineFormats.slice().forEach((format, index) => {
+  const original = document.getElementById(format.id);
+  const group = original.parentElement.parentElement;
+  const heading = group.querySelector('.label');
+  const alternativeId = format.id + '-alt';
+  const alternativeDeckId = 'deck-' + (index + 1) + '-alt';
+
+  heading.classList.add('format-heading');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'variant-button';
+  button.textContent = '+';
+  button.title = 'Visa ett extra rubrikförslag';
+  button.setAttribute('aria-label', 'Visa alternativ för ' + heading.textContent.trim());
+  button.setAttribute('aria-expanded', 'false');
+  button.setAttribute('aria-controls', alternativeId + '-section');
+  heading.appendChild(button);
+
+  const section = document.createElement('div');
+  section.className = 'alternative-block';
+  section.id = alternativeId + '-section';
+  section.setAttribute('aria-hidden', 'true');
+  section.inert = true;
+
+  // Allt innehåll ligger i ett inre element så höjden kan animeras.
+  const sectionInner = document.createElement('div');
+  sectionInner.className = 'alternative-block-inner';
+  if (original.classList.contains('regular')) sectionInner.classList.add('regular-alternative');
+  section.appendChild(sectionInner);
+
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = 'Alternativ';
+  sectionInner.appendChild(label);
+
+  const headlineBox = original.parentElement.cloneNode(false);
+  const alternative = original.cloneNode(false);
+  alternative.id = alternativeId;
+  alternative.value = '';
+  alternative.removeAttribute('title');
+  headlineBox.appendChild(alternative);
+  sectionInner.appendChild(headlineBox);
+
+  const originalDeck = deckFields[index];
+  const deckBox = originalDeck.parentElement.cloneNode(false);
+  const alternativeDeck = originalDeck.cloneNode(false);
+  alternativeDeck.id = alternativeDeckId;
+  alternativeDeck.value = '';
+  deckBox.appendChild(alternativeDeck);
+  sectionInner.appendChild(deckBox);
+  group.appendChild(section);
+
+  // Lägg till alternativet i samma system för storleksanpassning
+  // och automatisk förhandsvisning som originalfälten.
+  headlineFormats.push({ id: alternativeId, maxSize: format.maxSize });
+  headlineIds.push(alternativeId);
+  deckFields.push(alternativeDeck);
+
+  button.addEventListener('click', () => {
+    const opening = !section.classList.contains('is-open');
+
+    // Om alternativet är aktivt återgår vi till originalet vid stängning.
+    if (!opening && activeSource === alternativeId) original.focus();
+
+    section.classList.toggle('is-open', opening);
+    section.inert = !opening;
+    section.setAttribute('aria-hidden', String(!opening));
+    button.textContent = opening ? '−' : '+';
+    button.title = opening ? 'Fäll ihop alternativet' : 'Visa ett extra rubrikförslag';
+    button.setAttribute('aria-expanded', String(opening));
+    button.setAttribute('aria-label', (opening ? 'Dölj' : 'Visa') + ' alternativ för ' + heading.firstChild.textContent.trim());
+
+    if (opening) {
+      // Mät när alternativet blivit synligt. Texten finns kvar vid återöppning.
+      fit(alternative, { min: 16, max: format.maxSize });
+      alternative.focus();
+    }
+  });
 });
 
-(function syncDeck(){
-  const decks=[
-    document.getElementById('deck-1'),
-    document.getElementById('deck-2'),
-    document.getElementById('deck-3')
-  ];
-  decks.forEach(src=>{
-    src.addEventListener('input',()=>{
-      decks.forEach(dst=>{
-        if(dst!==src) dst.value=src.value;
-      });
+// ============================================================
+// 2. MÄT HUR MÅNGA RADER EN RUBRIK TAR
+// Ett osynligt element mäter texten med samma typsnitt som
+// rubrikfältet. Marginalen 16 px kommer från det fungerande
+// radtest 2. Ändra den inte utan att testa alla fem format.
+// ============================================================
+const lineMirror = document.createElement('div');
+Object.assign(lineMirror.style, {
+  position: 'absolute',
+  visibility: 'hidden',
+  pointerEvents: 'none',
+  left: '-10000px',
+  top: '0',
+  padding: '0',
+  margin: '0',
+  border: '0',
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'normal',
+  wordBreak: 'normal'
+});
+document.body.appendChild(lineMirror);
+
+function measuredLines(field, fontSize) {
+  const style = getComputedStyle(field);
+
+  Object.assign(lineMirror.style, {
+    width: Math.max(1, field.clientWidth - 16) + 'px',
+    fontFamily: style.fontFamily,
+    fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle,
+    fontSize: fontSize + 'px',
+    lineHeight: style.lineHeight === 'normal' ? 'normal' : fontSize + 'px',
+    letterSpacing: style.letterSpacing,
+    textTransform: style.textTransform
+  });
+
+  // Nollbreddstecknet gör att en avslutande radbrytning räknas.
+  lineMirror.textContent = (field.value || '') + '\u200b';
+  return Math.max(1, Math.ceil((lineMirror.getBoundingClientRect().height - 0.5) / fontSize));
+}
+
+// ============================================================
+// 3. ANPASSA RUBRIKENS STORLEK
+// Binärsökning hittar största möjliga storlek som ryms inom
+// två respektive tre rader. Ingen text klipps bort.
+// ============================================================
+function fit(field, { min = 16, max, precision = 0.25 }) {
+  const allowedLines = Number(field.dataset.lines) || 2;
+  if (!field.clientWidth) return;
+
+  let lower = min;
+  let upper = max;
+
+  if (measuredLines(field, max) <= allowedLines) {
+    field.style.fontSize = max + 'px';
+    return;
+  }
+
+  while (upper - lower > precision) {
+    const middle = (lower + upper) / 2;
+    if (measuredLines(field, middle) <= allowedLines) {
+      lower = middle;
+    } else {
+      upper = middle;
+    }
+  }
+
+  field.style.fontSize = Math.max(min, lower - 0.5) + 'px';
+  field.title = measuredLines(field, lower) > allowedLines
+    ? 'Texten är för lång för ' + allowedLines + ' rader'
+    : '';
+}
+
+// Koppla omräkning till skrivning, inklistring och fönsterstorlek.
+function attachHeadline(field, maxSize) {
+  const recalculate = () => fit(field, { min: 16, max: maxSize });
+
+  field.addEventListener('input', recalculate);
+
+  // INKLISTRING AV RUBRIKER
+  // Webbsidor kan lägga in radbrytningar och hårda mellanslag i kopierad text.
+  // Gör bara den inklistrade delen till löpande text. Text som redan finns
+  // i fältet och manuella radbrytningar som redaktören skriver lämnas orörda.
+  field.addEventListener('paste', event => {
+    const clipboardText = event.clipboardData?.getData('text/plain');
+    if (!clipboardText) return; // Låt Chrome hantera t.ex. bilddata som vanligt.
+
+    event.preventDefault();
+    const normalized = clipboardText
+      .replace(/[\u200B\u2060\uFEFF]/g, '') // Osynliga formateringstecken.
+      .replace(/\s+/gu, ' ')                // Radbrytningar och extra blanksteg.
+      .trim();
+
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    const before = field.value.slice(0, start);
+    const after = field.value.slice(end);
+    const prefix = /^\s/.test(clipboardText) && before && !/\s$/.test(before) ? ' ' : '';
+    const suffix = /\s$/.test(clipboardText) && after && !/^\s/.test(after) ? ' ' : '';
+    const cleanedText = prefix + normalized + suffix;
+
+    // Låt Chrome utföra själva textinfogningen. Till skillnad från
+    // setRangeText kan insertText ingå i Chromes vanliga ångrahistorik,
+    // så att Cmd+Z kan återställa en inklistring (även över markerad text).
+    // execCommand är ett äldre API, därför finns en reservmetod nedan.
+    const inserted = document.execCommand('insertText', false, cleanedText);
+    if (!inserted) {
+      // Reservmetod om Chrome någon gång slutar stödja insertText.
+      // Inklistringen fungerar fortfarande, men Cmd+Z kan då saknas.
+      field.setRangeText(cleanedText, start, end, 'end');
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Säkerställ att radmätning och förhandsvisning hinner uppdateras.
+    requestAnimationFrame(() => {
+      recalculate();
+      if (activeSource === field.id) updatePreview();
     });
   });
-})();
-</script>
 
+  window.addEventListener('resize', recalculate);
+  recalculate();
+}
+
+headlineFormats.forEach(format => {
+  const field = document.getElementById(format.id);
+  if (field) attachHeadline(field, format.maxSize);
+});
+
+// ============================================================
+// 4. SLÅ PÅ ELLER AV FÖRHANDSVISNINGEN
+// Puffen är avstängd när sidan öppnas. Reglaget visar eller döljer
+// den utan att rubriker, nedryck eller bild raderas.
+// ============================================================
+const layout = document.getElementById('layout');
+const previewArea = document.getElementById('preview');
+const togglePreviewButton = document.getElementById('toggle-preview');
+const previewStatus = document.getElementById('preview-status');
+
+togglePreviewButton.addEventListener('click', () => {
+  const shouldShow = previewArea.hidden;
+  previewArea.hidden = !shouldShow;
+  layout.classList.toggle('preview-collapsed', !shouldShow);
+  togglePreviewButton.setAttribute('aria-checked', String(shouldShow));
+  previewStatus.textContent = shouldShow ? 'På' : 'Av';
+
+  // Den dolda puffen har bredd 0. Beräkna textstorleken först
+  // när puffen visas igen, så att radbrytningen blir korrekt.
+  if (shouldShow) requestAnimationFrame(updatePreview);
+});
+
+// ============================================================
+// 5. FÖRHANDSVISNING I REALTID
+// Det senast aktiva rubrik- eller nedrycksfältet bestämmer
+// vilken av de fem puffarna som visas. Ingen väljare behövs.
+// ============================================================
+let activeSource = 'large-2';
+const previewTitle = document.getElementById('preview-title');
+const previewDeck = document.getElementById('preview-deck');
+
+function updatePreview() {
+  const headline = document.getElementById(activeSource);
+  const deck = deckFields[headlineIds.indexOf(activeSource)];
+
+  previewTitle.textContent = headline.value;
+  previewDeck.textContent = deck.value;
+
+  // Samma relativa teckenstorlek som i rubrikgranskningen.
+  const sourceSize = parseFloat(getComputedStyle(headline).fontSize);
+  if (!previewTitle.clientWidth || !headline.clientWidth) return;
+  previewTitle.style.fontSize =
+    (sourceSize * previewTitle.clientWidth / headline.clientWidth) + 'px';
+}
+
+headlineIds.forEach(id => {
+  const field = document.getElementById(id);
+  field.addEventListener('focus', () => {
+    activeSource = id;
+    updatePreview();
+  });
+  field.addEventListener('input', () => {
+    activeSource = id;
+    requestAnimationFrame(updatePreview);
+  });
+});
+
+deckFields.forEach((field, index) => {
+  field.addEventListener('focus', () => {
+    activeSource = headlineIds[index];
+    updatePreview();
+  });
+  field.addEventListener('input', updatePreview);
+});
+
+window.addEventListener('resize', () => requestAnimationFrame(updatePreview));
+
+// Typsnitt kan laddas efter att sidan visas. Mät då om allt.
+document.fonts.ready.then(() => {
+  headlineFormats.forEach(format => {
+    fit(document.getElementById(format.id), { min: 16, max: format.maxSize });
+  });
+  updatePreview();
+});
+updatePreview();
+
+// ============================================================
+// 6. BILDHANTERING
+// Bilden finns bara lokalt i webbläsaren. Den kan väljas,
+// dras in, klistras in eller tas bort med krysset.
+// ============================================================
+const fileInput = document.getElementById('image-file');
+const previewImage = document.getElementById('preview-image');
+const emptyImage = document.getElementById('empty-image');
+const removeButton = document.getElementById('remove-image');
+const dropArea = document.querySelector('.preview-area');
+let objectURL = null;
+
+function removeImage() {
+  if (objectURL) URL.revokeObjectURL(objectURL);
+  objectURL = null;
+  previewImage.removeAttribute('src');
+  previewImage.hidden = true;
+  emptyImage.hidden = false;
+  removeButton.hidden = true;
+  fileInput.value = '';
+}
+
+function loadImage(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  if (objectURL) URL.revokeObjectURL(objectURL);
+
+  objectURL = URL.createObjectURL(file);
+  previewImage.onload = () => {
+    previewImage.hidden = false;
+    emptyImage.hidden = true;
+    removeButton.hidden = false;
+  };
+  previewImage.onerror = () => {
+    previewImage.hidden = true;
+    emptyImage.hidden = false;
+    removeButton.hidden = true;
+  };
+  previewImage.src = objectURL;
+}
+
+removeButton.addEventListener('click', removeImage);
+fileInput.addEventListener('change', () => loadImage(fileInput.files[0]));
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, event => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    emptyImage.classList.add('drag');
+  });
+});
+
+dropArea.addEventListener('dragleave', event => {
+  if (!dropArea.contains(event.relatedTarget)) {
+    emptyImage.classList.remove('drag');
+  }
+});
+
+dropArea.addEventListener('drop', event => {
+  event.preventDefault();
+  emptyImage.classList.remove('drag');
+  const image = Array.from(event.dataTransfer.files).find(file =>
+    file.type.startsWith('image/')
+  );
+  loadImage(image);
+});
+
+// Förhindra att Chrome öppnar den släppta bilden som en ny sida.
+window.addEventListener('dragover', event => event.preventDefault());
+window.addEventListener('drop', event => event.preventDefault());
+
+// Även inklistrade bilder från urklippet ska fungera.
+document.addEventListener('paste', event => {
+  const image = Array.from(event.clipboardData?.files || []).find(file =>
+    file.type.startsWith('image/')
+  );
+  if (image) loadImage(image);
+});
+</script>
 </body>
+
 </html>
