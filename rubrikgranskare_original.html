@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>rubrikgranskare</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml"
+      href='data:image/svg+xml;utf8,
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="%23000000"/>
+  <path d="M18 46l4-14 20-20 10 10-20 20-14 4z" fill="%23ffffff"/>
+</svg>'>
+
+<!-- Fonts -->
+<link rel="preload"
+      href="https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin>
+
+<style>
+@font-face{
+  font-family: ABMonument;
+  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face{
+  font-family: ABMonumentRegular;
+  src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+body{
+  margin:0;
+  background:#fffec8;
+  min-height:100vh;
+  font-family:ABMonument,sans-serif;
+}
+
+.outer{
+  position:relative;
+  padding-top:24px;
+}
+
+.main{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.sidebar{
+  position:absolute;
+  left:50%;
+  top:18px;
+  transform:translateX(-520px);
+  width:220px;
+  font-family:"Courier New",Courier,monospace;
+  color:rgba(0,0,0,0.65);
+}
+
+.sidebar .title{
+  font-size:32px;
+  letter-spacing:0.12em;
+  line-height:1.1;
+}
+.sidebar .contact{
+  margin-top:10px;
+  font-size:13px;
+  font-style:italic;
+}
+.sidebar .contact a{
+  color:#005bd1;
+  text-decoration:none;
+}
+
+.wrapper{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.label{
+  font-size:13px;
+  color:#555;
+  margin:0 0 4px 2px;
+}
+
+.box{
+  width:375px;
+  background:#fff;
+  padding:0 4px;
+}
+.box.regular-box{
+  width:360px;
+}
+
+.deck-box{
+  width:340px;
+  background:#fff;
+  padding:0 4px;
+}
+
+.box-gap{ margin-bottom:10px; }
+.deck-gap{ margin-top:10px; }
+
+textarea{
+  width:100%;
+  font-family:ABMonument,sans-serif;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-0.02em;
+  padding:0;
+  margin:0;
+  border:none;
+  outline:none;
+  resize:none;
+  overflow:hidden;
+  background:#fff;
+  color:#000;
+}
+
+textarea.regular,
+textarea.large,
+textarea.xl{
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+}
+
+textarea.regular{
+  font-size:44px;
+  height:calc(44px * 2);
+}
+
+textarea.large{
+  font-size:54px;
+}
+textarea.large[data-lines="2"]{
+  height:calc(54px * 2);
+}
+textarea.large[data-lines="3"]{
+  height:calc(54px * 3);
+}
+
+textarea.xl{
+  font-size:74px;
+}
+textarea.xl[data-lines="2"]{
+  height:calc(74px * 2);
+}
+textarea.xl[data-lines="3"]{
+  height:calc(74px * 3);
+}
+
+.decktext{
+  font-family:ABMonumentRegular,sans-serif;
+  font-size:16px;
+  line-height:1.2;
+  height:calc(16px * 2.4);
+}
+.decktext::placeholder{
+  color:rgba(0,0,0,0.32);
+}
+</style>
+
+<!-- Analytics: Plausible (correct for /rubriker) -->
+<script defer
+        data-domain="joakimottosson-testing.github.io/rubriker"
+        src="https://plausible.io/js/script.js"></script>
+
+
+
+</head>
+
+<body>
+
+<div class="outer">
+
+  <div class="sidebar">
+    <div class="title">RUBRIK-<br>GRANSKARE</div>
+    <div class="contact">
+      Beta 1.1<br>
+
+
+        Contact:
+  <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a>
+
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="wrapper">
+
+      <div>
+        <div class="label">Regular · 2 rader</div>
+        <div class="box regular-box box-gap">
+          <textarea id="regular-2" class="regular"></textarea>
+        </div>
+        <div class="deck-box">
+          <textarea id="deck-1" class="decktext" placeholder="nedryck"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">Large · 2 rader</div>
+        <div class="box">
+          <textarea id="large-2" class="large" data-lines="2"></textarea>
+        </div>
+        <div class="deck-box deck-gap">
+          <textarea id="deck-2" class="decktext" placeholder="nedryck"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">Large · 3 rader</div>
+        <div class="box">
+          <textarea id="large-3" class="large" data-lines="3"></textarea>
+        </div>
+        <div class="deck-box deck-gap">
+          <textarea id="deck-3" class="decktext" placeholder="nedryck"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">XL · 2 rader</div>
+        <div class="box">
+          <textarea id="xl-2" class="xl" data-lines="2"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">XL · 3 rader</div>
+        <div class="box">
+          <textarea id="xl-3" class="xl" data-lines="3"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function fit(el, { min = 16, max, precision = 0.25 }) {
+  const w = el.clientWidth;
+  const h = el.clientHeight;
+  if (!w || !h) return;
+
+  let lo = min;
+  let hi = max;
+
+  while (hi - lo > precision) {
+    const mid = (lo + hi) / 2;
+    el.style.fontSize = mid + 'px';
+    if (el.scrollWidth <= w && el.scrollHeight <= h) lo = mid;
+    else hi = mid;
+  }
+  el.style.fontSize = lo + 'px';
+}
+
+function attach(el, max){
+  const run = () => fit(el, { min: 16, max });
+  el.addEventListener('input', run);
+  window.addEventListener('resize', run);
+  run();
+}
+
+[
+  ['regular-2',44],
+  ['large-2',54],
+  ['large-3',54],
+  ['xl-2',74],
+  ['xl-3',74]
+].forEach(([id,max])=>{
+  const el=document.getElementById(id);
+  if(el) attach(el,max);
+});
+
+(function syncDeck(){
+  const decks=[
+    document.getElementById('deck-1'),
+    document.getElementById('deck-2'),
+    document.getElementById('deck-3')
+  ];
+  decks.forEach(src=>{
+    src.addEventListener('input',()=>{
+      decks.forEach(dst=>{
+        if(dst!==src) dst.value=src.value;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
