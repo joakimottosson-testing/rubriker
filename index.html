@@ -116,9 +116,20 @@
   }
 
   .contact {
-    font-size: 13px;
+    font-size: 11px;
     font-style: italic;
     margin-top: 4px;
+  }
+
+  /* Lank till den korta manualfilmen. Alltid understruken sa den syns som klickbar. */
+  .contact .help-link {
+    color: #555;
+    text-decoration: underline;
+  }
+
+  .contact .help-link:hover,
+  .contact .help-link:focus-visible {
+    text-decoration: underline;
   }
 
   .contact a {
@@ -446,10 +457,13 @@
     RUBRIKGRANSKARE
    </div>
    <div class="contact">
-    Beta 2.0 Contact:
-    <a href="mailto:joakim.ottosson@schibsted.com">
-     Joakim Ottosson
-    </a>
+    Beta 2.1 ·
+    <a class="help-link"
+       href="https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/view"
+       target="_blank" rel="noopener noreferrer"
+       title="Se demonstrationsvideon i en ny flik">ⓘ Nya funktioner</a>
+    · Contact:
+    <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a>
    </div>
   </aside>
   <main class="wrapper">
@@ -923,6 +937,10 @@ document.addEventListener('paste', event => {
   if (image) loadImage(image);
 });
 </script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token":"4764fa06da20451da03dd9b31d4d254a"}'></script>
+<!-- End Cloudflare Web Analytics -->
 </body>
 
 </html>
