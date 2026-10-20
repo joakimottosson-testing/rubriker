@@ -116,7 +116,7 @@
   }
 
   .contact {
-    font-size: 11px;
+    font-size: 12px;
     font-style: italic;
     margin-top: 4px;
   }
@@ -234,6 +234,7 @@
   .decktext::placeholder {
     color: #aaa;
     font-style: italic;
+    font-size: 14px;
   }
 
   /* Sticky: puffen syns när redaktören scrollar mellan rubrikfälten. */
@@ -401,11 +402,23 @@
     display: grid;
     grid-template-rows: 0fr;
     margin-top: 0;
+    margin-left: 8px; /* Hela alternativet dras in, utan att fältens bredd ändras. */
+    position: relative;
     transition: grid-template-rows 130ms ease-out, margin-top 130ms ease-out;
   }
   .alternative-block.is-open {
     grid-template-rows: 1fr;
     margin-top: 14px;
+  }
+  /* En 8 px gul remsa markerar indraget. Fälten behåller sina bredder. */
+  .alternative-block.is-open::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: #fff4b8;
   }
   .alternative-block-inner {
     min-height: 0;
