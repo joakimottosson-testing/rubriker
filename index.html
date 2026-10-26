@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Rubrikgranskare – Beta 2.1</title>
+  <title>Rubrikgranskare – Beta 2.1 (390 px test)</title>
   <!-- Favicon: pennikonen från originalversionen. -->
   <link rel="icon" type="image/svg+xml"
         href='data:image/svg+xml;utf8,
@@ -15,7 +15,7 @@
   /* Typsnitt: externa filer som behövs för korrekta radbrytningar. */
   @font-face {
     font-family: ABMonument;
-    src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGrotesk/ABMonumentGrotesk-Bold750.woff2') format('woff2');
+    src: url('https://cdn.aftonbladet.se/fonts/ABMonumentGroteskHeadline/ABMonumentGroteskHeadline-Bold750.woff2') format('woff2');
     font-display: swap;
   }
 
@@ -39,7 +39,7 @@
   /* Huvudlayout: rubrikfält till vänster och puff till höger. */
   .layout {
     display: grid;
-    grid-template-columns: 383px minmax(380px,620px);
+    grid-template-columns: 400px minmax(390px,620px);
     gap: 24px 34px;
     max-width: 1060px;
     margin: 24px auto;
@@ -56,7 +56,7 @@
   /* När förhandsvisningen är stängd blir verktyget smalt och centrerat. */
   /* Låt högerspaltens rubrik vara synlig även när puffen är infälld. */
   .layout.preview-collapsed {
-    grid-template-columns: 383px minmax(380px,620px);
+    grid-template-columns: 400px minmax(390px,620px);
   }
 
   /* Reglaget sitter på samma rad som puffens etikett. Av är standard. */
@@ -176,7 +176,7 @@
   textarea {
     width: 100%;
     font-family: ABMonument,sans-serif;
-    font-weight: 800;
+    font-weight: 750;
     line-height: 1;
     letter-spacing: -.02em;
     padding: 0;
@@ -279,10 +279,10 @@
     display: none;
   }
 
-  /* Mobilpuffen är 375 px bred. */
+  /* Test: mobilpuffen motsvarar 390 px skärmbredd. */
   .preview {
     background: #fff;
-    width: 375px;
+    width: 390px;
     max-width: 100%;
     overflow: hidden;
     position: relative;
@@ -302,6 +302,9 @@
      Muspekaren ska inte visa en textmarkor och texten ska inte
      kunna markeras eller ge intryck av att vara redigerbar. */
   .preview-copy {
+    width: 340px;
+    max-width: 100%;
+    background: #fff;
     padding: 12px 4px 16px;
     user-select: none;
     -webkit-user-select: none;
@@ -317,7 +320,7 @@
 
   .preview-title {
     font-family: ABMonument,sans-serif;
-    font-weight: 800;
+    font-weight: 750;
     letter-spacing: -.02em;
     line-height: 1;
     overflow-wrap: normal;
@@ -325,12 +328,16 @@
   }
 
   .preview-deck {
+    width: 100%;
+    max-width: 100%;
     font-family: ABMonumentRegular,Arial,sans-serif;
     font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.02em;
     line-height: 1.2;
     margin-top: 10px;
     white-space: pre-wrap;
-    overflow-wrap: break-word;
+    overflow-wrap: normal;
   }
 
   .empty-image {
