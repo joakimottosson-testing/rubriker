@@ -39,9 +39,9 @@
   /* Huvudlayout: rubrikfält till vänster och puff till höger. */
   .layout {
     display: grid;
-    grid-template-columns: 400px minmax(390px,620px);
-    gap: 24px 34px;
-    max-width: 1060px;
+    grid-template-columns: 383px 375px;
+    gap: 24px 20px;
+    max-width: 822px;
     margin: 24px auto;
     padding: 0 22px;
     align-items: start;
@@ -56,7 +56,7 @@
   /* När förhandsvisningen är stängd blir verktyget smalt och centrerat. */
   /* Låt högerspaltens rubrik vara synlig även när puffen är infälld. */
   .layout.preview-collapsed {
-    grid-template-columns: 400px minmax(390px,620px);
+    grid-template-columns: 383px 375px;
   }
 
   /* Reglaget sitter på samma rad som puffens etikett. Av är standard. */
@@ -279,10 +279,10 @@
     display: none;
   }
 
-  /* Test: mobilpuffen motsvarar 390 px skärmbredd. */
+  /* Puffens bredd matchar det aktiva rubrikfaltets faktiska boxbredd. */
   .preview {
     background: #fff;
-    width: 390px;
+    width: 375px;
     max-width: 100%;
     overflow: hidden;
     position: relative;
@@ -302,7 +302,7 @@
      Muspekaren ska inte visa en textmarkor och texten ska inte
      kunna markeras eller ge intryck av att vara redigerbar. */
   .preview-copy {
-    width: 340px;
+    width: 100%;
     max-width: 100%;
     background: #fff;
     padding: 12px 4px 16px;
@@ -829,11 +829,16 @@ function updatePreview() {
   previewTitle.textContent = headline.value;
   previewDeck.textContent = deck.value;
 
-  // Samma relativa teckenstorlek som i rubrikgranskningen.
-  const sourceSize = parseFloat(getComputedStyle(headline).fontSize);
-  if (!previewTitle.clientWidth || !headline.clientWidth) return;
-  previewTitle.style.fontSize =
-    (sourceSize * previewTitle.clientWidth / headline.clientWidth) + 'px';
+  // Ingen skalning: identisk boxbredd och fontstorlek som redigeringsfaltet.
+  // Regular (360 px) respektive Large/XL (375 px).
+  const preview = document.getElementById('preview');
+  preview.style.width = headline.parentElement.getBoundingClientRect().width + 'px';
+  const sourceStyle = getComputedStyle(headline);
+  previewTitle.style.fontSize = sourceStyle.fontSize;
+  previewTitle.style.fontFamily = sourceStyle.fontFamily;
+  previewTitle.style.fontWeight = sourceStyle.fontWeight;
+  previewTitle.style.letterSpacing = sourceStyle.letterSpacing;
+  previewTitle.style.lineHeight = sourceStyle.lineHeight;
 }
 
 headlineIds.forEach(id => {
