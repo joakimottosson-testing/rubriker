@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Rubrikgranskare – Beta 2.1 (390 px test)</title>
+  <title>Rubrikgranskaren</title>
   <!-- Rubrikgranskaren: vitt R på röd botten. -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='11' fill='%23E60000'/%3E%3Ctext x='32' y='47' text-anchor='middle' font-family='Arial,sans-serif' font-size='49' font-weight='900' fill='white'%3ER%3C/text%3E%3C/svg%3E">
   <style>
@@ -452,6 +452,77 @@
       transition:none;
     }
   }
+
+  /* Extra sidopuff: 2/3 text och 1/3 bild, under ordinarie puff. */
+  .side-preview {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    width: 375px;
+    max-width: 100%;
+    margin-top: 14px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .side-preview[hidden] { display: none; }
+  .side-preview-toggle-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; font: 13px Arial, sans-serif; color: #555;
+  }
+  .side-preview-toggle-row[hidden] { display: none; }
+  .side-preview-toggle-row .variant-button { margin: -12px -11px -12px -6px; }
+  .side-title, .side-deck { user-select: none; pointer-events: none; cursor: default; }
+
+  .side-copy { padding: 10px 6px; min-width: 0; }
+  .side-title {
+    font-family: ABMonument, sans-serif;
+    font-weight: 750;
+    letter-spacing: -.02em;
+    line-height: 1;
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+  }
+  .side-deck {
+    font-family: ABMonumentRegular, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-top: 8px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+  .side-image-area {
+    position: relative;
+    min-height: 115px;
+    background: #eee;
+    overflow: hidden;
+  }
+  .side-image-area img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    object-position: center;
+  }
+  .side-image-area img[hidden] { display: none; }
+  .side-image-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font: 12px Arial, sans-serif;
+    color: #999;
+    text-align: center;
+  }
+  .side-image-placeholder[hidden] { display: none; }
+  .side-crop-controls { display: flex; align-items: center; gap: 8px; margin-top: 7px; font: 12px Arial, sans-serif; color: #555; }
+  .side-crop-controls[hidden] { display: none; }
+  .side-crop-controls button { border: 1px solid #aaa; border-radius: 3px; background: #fff; color: #333; padding: 5px 9px; cursor: pointer; font: inherit; }
+  .side-crop-controls button[aria-pressed="true"] { background: #333; color: white; border-color: #333; }
+  .side-crop-controls button:focus-visible { outline: 2px solid #005bd1; outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -461,7 +532,7 @@
     RUBRIKGRANSKARE
    </div>
    <div class="contact">
-    Beta 2.1 ·
+    Beta 2.2 ·
     <a class="help-link"
        href="https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/view"
        target="_blank" rel="noopener noreferrer"
@@ -550,6 +621,28 @@
      <div class="preview-title" id="preview-title"></div>
      <div class="preview-deck" id="preview-deck"></div>
     </div>
+   </div>
+   <div class="side-preview-toggle-row" id="side-preview-toggle-row" hidden>
+     <span>Sidopuff</span>
+     <button type="button" class="variant-button" id="toggle-side-preview"
+       aria-expanded="false" aria-controls="side-preview" aria-label="Visa sidopuff"
+       title="Visa sidopuff">+</button>
+   </div>
+   <div class="side-preview" id="side-preview" hidden aria-label="Sidopuff med bild till höger">
+     <div class="side-copy">
+       <div class="side-title" id="side-title"></div>
+       <div class="side-deck" id="side-deck"></div>
+     </div>
+     <div class="side-image-area">
+       <div class="side-image-placeholder" id="side-image-placeholder">Bildutsnitt</div>
+       <img id="side-image" alt="Beskuret utsnitt av vald bild" hidden>
+     </div>
+   </div>
+   <div class="side-crop-controls" id="side-crop-controls" hidden aria-label="Välj bildutsnitt för sidopuffen">
+     <span>Bildutsnitt:</span>
+     <button type="button" data-crop="left" aria-pressed="false" title="Visa vänstra delen">Vänster</button>
+     <button type="button" data-crop="center" aria-pressed="true" title="Visa mitten">Mitten</button>
+     <button type="button" data-crop="right" aria-pressed="false" title="Visa högra delen">Höger</button>
    </div>
   </section>
  </div>
@@ -796,10 +889,27 @@ const layout = document.getElementById('layout');
 const previewArea = document.getElementById('preview');
 const togglePreviewButton = document.getElementById('toggle-preview');
 const previewStatus = document.getElementById('preview-status');
+const sidePreview = document.getElementById('side-preview');
+const sideToggleRow = document.getElementById('side-preview-toggle-row');
+const sideToggleButton = document.getElementById('toggle-side-preview');
+let sideExpanded = false;
+sideToggleButton.addEventListener('click', () => {
+  sideExpanded = !sideExpanded;
+  sidePreview.hidden = previewArea.hidden || !sideExpanded;
+  document.getElementById('side-crop-controls').hidden = sidePreview.hidden;
+  sideToggleButton.textContent = sideExpanded ? '−' : '+';
+  sideToggleButton.setAttribute('aria-expanded', String(sideExpanded));
+  sideToggleButton.setAttribute('aria-label', sideExpanded ? 'Dölj sidopuff' : 'Visa sidopuff');
+  sideToggleButton.title = sideExpanded ? 'Dölj sidopuff' : 'Visa sidopuff';
+  if (!sidePreview.hidden) requestAnimationFrame(updatePreview);
+});
 
 togglePreviewButton.addEventListener('click', () => {
   const shouldShow = previewArea.hidden;
   previewArea.hidden = !shouldShow;
+  sideToggleRow.hidden = !shouldShow;
+  sidePreview.hidden = !shouldShow || !sideExpanded;
+  document.getElementById('side-crop-controls').hidden = sidePreview.hidden;
   layout.classList.toggle('preview-collapsed', !shouldShow);
   togglePreviewButton.setAttribute('aria-checked', String(shouldShow));
   previewStatus.textContent = shouldShow ? 'På' : 'Av';
@@ -817,6 +927,72 @@ togglePreviewButton.addEventListener('click', () => {
 let activeSource = 'large-2';
 const previewTitle = document.getElementById('preview-title');
 const previewDeck = document.getElementById('preview-deck');
+const sideTitle = document.getElementById('side-title');
+const sideDeck = document.getElementById('side-deck');
+
+// Anpassa sidopuffens rubrik till den faktiska textkolumnen.
+// Separat från huvudrubrikens 1:1-förhandsvisning.
+const sideMeasure = document.createElement('div');
+Object.assign(sideMeasure.style, {
+  position: 'absolute', visibility: 'hidden', pointerEvents: 'none',
+  left: '-10000px', top: '0', padding: '0', border: '0', margin: '0',
+  whiteSpace: 'pre-wrap', overflowWrap: 'normal', wordBreak: 'normal'
+});
+document.body.appendChild(sideMeasure);
+
+function fitSideTitle() {
+  if (sidePreview.hidden || !sideTitle.clientWidth) return;
+  const style = getComputedStyle(sideTitle);
+  const text = sideTitle.textContent || '';
+  Object.assign(sideMeasure.style, {
+    width: sideTitle.clientWidth + 'px',
+    fontFamily: style.fontFamily, fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle, letterSpacing: style.letterSpacing,
+    textTransform: style.textTransform
+  });
+  sideMeasure.textContent = text + '\u200b';
+  // Kontrollera verkligt antal renderade rader med samma font och textbredd.
+  const range = document.createRange();
+  range.selectNodeContents(sideMeasure);
+  const lineCount = size => {
+    sideMeasure.style.fontSize = size + 'px';
+    sideMeasure.style.lineHeight = size + 'px';
+    const rects = Array.from(range.getClientRects()).filter(r => r.width > 0);
+    const tops = [];
+    for (const rect of rects) {
+      if (!tops.some(y => Math.abs(y - rect.top) < 1)) tops.push(rect.top);
+    }
+    return tops.length;
+  };
+  let low = 8, high = 34;
+  if (lineCount(high) <= 2) low = high;
+  else if (lineCount(low) <= 2) {
+    for (let i = 0; i < 14; i++) {
+      const mid = (low + high) / 2;
+      if (lineCount(mid) <= 2) low = mid;
+      else high = mid;
+    }
+  }
+  // En liten marginal mot skillnader i subpixelavrundning.
+  let size = Math.max(8, low - 0.5);
+  sideTitle.style.fontSize = size + 'px';
+  // Verifiera även den synliga rubrikens faktiska radantal.
+  const actualRange = document.createRange();
+  actualRange.selectNodeContents(sideTitle);
+  const actualLines = () => {
+    const tops = [];
+    for (const rect of actualRange.getClientRects()) {
+      if (rect.width > 0 && !tops.some(y => Math.abs(y - rect.top) < 1)) tops.push(rect.top);
+    }
+    return tops.length;
+  };
+  while (actualLines() > 2 && size > 8) {
+    size = Math.max(8, size - 0.25);
+    sideTitle.style.fontSize = size + 'px';
+  }
+  // Manuella radbrytningar kan tvinga fram fler än två rader.
+  sideTitle.title = actualLines() > 2 ? 'Manuella radbrytningar ger fler än två rader' : '';
+}
 
 function updatePreview() {
   const headline = document.getElementById(activeSource);
@@ -824,6 +1000,8 @@ function updatePreview() {
 
   previewTitle.textContent = headline.value;
   previewDeck.textContent = deck.value;
+  sideTitle.textContent = headline.value;
+  sideDeck.textContent = deck.value;
 
   // Ingen skalning: identisk boxbredd och fontstorlek som redigeringsfaltet.
   // Regular (360 px) respektive Large/XL (375 px).
@@ -835,6 +1013,9 @@ function updatePreview() {
   previewTitle.style.fontWeight = sourceStyle.fontWeight;
   previewTitle.style.letterSpacing = sourceStyle.letterSpacing;
   previewTitle.style.lineHeight = sourceStyle.lineHeight;
+  sidePreview.style.width = preview.style.width;
+  // Sidopuffen mäts separat, mot sin egen textkolumn (2/3 av bredden).
+  fitSideTitle();
 }
 
 headlineIds.forEach(id => {
@@ -875,6 +1056,19 @@ updatePreview();
 // ============================================================
 const fileInput = document.getElementById('image-file');
 const previewImage = document.getElementById('preview-image');
+const sideImage = document.getElementById('side-image');
+// Beskärning påverkar enbart sidopuffen, inte huvudbilden.
+const cropControls = document.getElementById('side-crop-controls');
+cropControls.querySelectorAll('button[data-crop]').forEach(button => {
+  button.addEventListener('click', () => {
+    const position = { left: 'left center', center: 'center center', right: 'right center' }[button.dataset.crop];
+    sideImage.style.objectPosition = position;
+    cropControls.querySelectorAll('button[data-crop]').forEach(item => {
+      item.setAttribute('aria-pressed', String(item === button));
+    });
+  });
+});
+const sideImagePlaceholder = document.getElementById('side-image-placeholder');
 const emptyImage = document.getElementById('empty-image');
 const removeButton = document.getElementById('remove-image');
 const dropArea = document.querySelector('.preview-area');
@@ -884,6 +1078,9 @@ function removeImage() {
   if (objectURL) URL.revokeObjectURL(objectURL);
   objectURL = null;
   previewImage.removeAttribute('src');
+  sideImage.removeAttribute('src');
+  sideImage.hidden = true;
+  sideImagePlaceholder.hidden = false;
   previewImage.hidden = true;
   emptyImage.hidden = false;
   removeButton.hidden = true;
@@ -897,14 +1094,19 @@ function loadImage(file) {
   objectURL = URL.createObjectURL(file);
   previewImage.onload = () => {
     previewImage.hidden = false;
+    sideImage.hidden = false;
+    sideImagePlaceholder.hidden = true;
     emptyImage.hidden = true;
     removeButton.hidden = false;
   };
   previewImage.onerror = () => {
     previewImage.hidden = true;
+    sideImage.hidden = true;
+    sideImagePlaceholder.hidden = false;
     emptyImage.hidden = false;
     removeButton.hidden = true;
   };
+  sideImage.src = objectURL;
   previewImage.src = objectURL;
 }
 
