@@ -377,6 +377,20 @@
 
   /* Ingen responsiv omflyttning: förhandsvisningen stannar alltid till höger. */
 
+  /* Rubriketiketter fungerar som klickbara kontroller utan visuell förändring. */
+  .clickable-heading {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .clickable-heading:focus-visible { outline: 2px solid #555; outline-offset: 3px; }
+
   /* Ett diskret plus vid varje format öppnar ett extra rubrikförslag. */
   .format-heading {
     display: flex;
@@ -600,7 +614,7 @@
   </main>
   <section class="preview-area" id="preview-area">
    <div class="preview-control">
-    <span id="preview-label">Puff · Förhandsvisning</span>
+    <button type="button" class="clickable-heading" id="preview-label" aria-controls="preview" title="Slå på eller av förhandsvisning">Puff · Förhandsvisning</button>
     <span class="preview-status" id="preview-status" aria-hidden="true">Av</span>
     <button type="button" class="preview-toggle" id="toggle-preview"
             role="switch" aria-label="Förhandsvisning" aria-checked="false"
@@ -623,7 +637,7 @@
     </div>
    </div>
    <div class="side-preview-toggle-row" id="side-preview-toggle-row" hidden>
-     <span>Sidopuff</span>
+     <button type="button" class="clickable-heading" id="side-preview-label" aria-controls="side-preview" title="Visa eller dölj sidopuff">Sidopuff</button>
      <button type="button" class="variant-button" id="toggle-side-preview"
        aria-expanded="false" aria-controls="side-preview" aria-label="Visa sidopuff"
        title="Visa sidopuff">+</button>
@@ -679,6 +693,14 @@ headlineFormats.slice().forEach((format, index) => {
   const alternativeDeckId = 'deck-' + (index + 1) + '-alt';
 
   heading.classList.add('format-heading');
+  const headingText = heading.textContent.trim();
+  heading.textContent = '';
+  const headingButton = document.createElement('button');
+  headingButton.type = 'button';
+  headingButton.className = 'clickable-heading';
+  headingButton.textContent = headingText;
+  headingButton.title = 'Visa eller dölj alternativ';
+  heading.appendChild(headingButton);
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'variant-button';
@@ -688,6 +710,7 @@ headlineFormats.slice().forEach((format, index) => {
   button.setAttribute('aria-expanded', 'false');
   button.setAttribute('aria-controls', alternativeId + '-section');
   heading.appendChild(button);
+  headingButton.addEventListener('click', () => button.click());
 
   const section = document.createElement('div');
   section.className = 'alternative-block';
@@ -741,7 +764,7 @@ headlineFormats.slice().forEach((format, index) => {
     button.textContent = opening ? '−' : '+';
     button.title = opening ? 'Fäll ihop alternativet' : 'Visa ett extra rubrikförslag';
     button.setAttribute('aria-expanded', String(opening));
-    button.setAttribute('aria-label', (opening ? 'Dölj' : 'Visa') + ' alternativ för ' + heading.firstChild.textContent.trim());
+    button.setAttribute('aria-label', (opening ? 'Dölj' : 'Visa') + ' alternativ för ' + headingText);
 
     if (opening) {
       // Mät när alternativet blivit synligt. Texten finns kvar vid återöppning.
@@ -1147,6 +1170,11 @@ document.addEventListener('paste', event => {
   );
   if (image) loadImage(image);
 });
+// Rubriketiketterna har samma funktion som respektive reglage.
+document.getElementById('preview-label').addEventListener('click', () =>
+  document.getElementById('toggle-preview').click());
+document.getElementById('side-preview-label').addEventListener('click', () =>
+  document.getElementById('toggle-side-preview').click());
 </script>
 <!-- Cloudflare Web Analytics -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js"
