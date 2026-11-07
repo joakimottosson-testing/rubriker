@@ -964,7 +964,7 @@ function fitSideTitle() {
     }
     return tops.length;
   };
-  let low = 8, high = 34;
+  let low = 8, high = 54; // Sidopuffen får växa för korta rubriker; max två rader.
   if (lineCount(high) <= 2) low = high;
   else if (lineCount(low) <= 2) {
     for (let i = 0; i < 14; i++) {
@@ -974,7 +974,7 @@ function fitSideTitle() {
     }
   }
   // En liten marginal mot skillnader i subpixelavrundning.
-  let size = Math.max(8, low - 0.5);
+  let size = Math.max(8, low - 0.25);
   sideTitle.style.fontSize = size + 'px';
   // Verifiera även den synliga rubrikens faktiska radantal.
   const actualRange = document.createRange();
