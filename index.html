@@ -1779,6 +1779,14 @@
         archiveToggle.setAttribute('aria-expanded', String(!archivePanel.hidden));
         if (!archivePanel.hidden) renderArchive();
       });
+      // Stäng arkivet när användaren klickar utanför arkivet och Arkiv-knappen.
+      // Påverka inte klicket i övrigt: redigering och andra kontroller ska fungera direkt.
+      document.addEventListener('pointerdown', event => {
+        if (archivePanel.hidden) return;
+        if (archivePanel.contains(event.target) || archiveToggle.contains(event.target)) return;
+        archivePanel.hidden = true;
+        archiveToggle.setAttribute('aria-expanded', 'false');
+      });
       headlineRecords.forEach((record, id) => {
         record.field.addEventListener('input', () => scheduleArchiveSave(id));
         record.deck.addEventListener('input', () => scheduleArchiveSave(id));
