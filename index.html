@@ -95,6 +95,39 @@
       color: var(--muted-text);
     }
 
+    /* Arkiv: dolt tills användaren öppnar det. */
+    .archive-trigger { border:0; padding:0; background:none; color:var(--muted-text); font:inherit; cursor:pointer; }
+    .archive-trigger:hover { text-decoration:underline; }
+    .archive-panel { grid-column:1/-1; background:#fffdf0; border:0; padding:12px; font:13px Arial,sans-serif; max-height:320px; overflow:auto; }
+    .archive-panel[hidden] { display:none; }
+    .archive-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .archive-header-actions { display:flex; align-items:center; gap:10px; }
+    .archive-search-toggle { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border:0; background:transparent; color:#888; cursor:pointer; padding:0; }
+    .archive-search-toggle:hover { color:#555; }
+    .archive-search-toggle:focus-visible { outline:2px solid var(--focus-color); outline-offset:2px; }
+    .archive-search-toggle svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; }
+    .archive-search-input { width:100%; padding:7px 2px; margin:0 0 9px; border:0; border-bottom:1px solid #d8d5bb; outline:0; background:transparent; color:#111; font:13px Arial,sans-serif; }
+    .archive-search-input:focus { border-bottom-color:#777; }
+    .archive-search-input[hidden] { display:none; }
+    .archive-list { display:grid; gap:5px; }
+    .archive-entry { width:100%; border:0; background:white; padding:9px 10px; text-align:left; cursor:pointer; color:#111; }
+    .archive-entry:hover, .archive-entry:focus-visible { background:#fff4b8; }
+    .archive-entry small { display:block; color:#777; margin-bottom:3px; }
+    /* Arkivets rubriker behåller 17 px men får samma radfördelning som originalet.
+       Bredden beräknas separat för varje sparad version i JavaScript. */
+    .archive-entry strong {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      font-family: ABMonument, sans-serif;
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .archive-entry span { display:block; margin-top:3px; }
     /* Rubrik- och nedrycksfält. */
     .wrapper {
       display: flex;
@@ -736,18 +769,32 @@
     <aside class="sidebar">
       <div class="title">RUBRIKGRANSKARE</div>
       <div class="contact">
-        Beta 2.3 ·
+        Beta 2.3 · <button type="button" class="archive-trigger" id="archive-toggle" aria-expanded="false" aria-controls="archive-panel">Arkiv</button> ·
         <a
           class="help-link"
           href="https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/view"
           target="_blank"
           rel="noopener noreferrer"
           title="Se demonstrationsvideon i en ny flik"
-        >ⓘ Nya funktioner</a>
+        >Nya funktioner</a>
         · Contact:
         <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a>
       </div>
     </aside>
+
+    <section class="archive-panel" id="archive-panel" hidden aria-label="Rubrikarkiv">
+      <div class="archive-header">
+        <strong>Senaste 24 timmarna</strong>
+        <div class="archive-header-actions">
+          <span id="archive-count"></span>
+          <button type="button" class="archive-search-toggle" id="archive-search-toggle" aria-label="Sök i arkivet" aria-expanded="false" aria-controls="archive-search" title="Sök rubrik">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5"></path></svg>
+          </button>
+        </div>
+      </div>
+      <input id="archive-search" class="archive-search-input" type="search" placeholder="Sök rubrik…" aria-label="Sök bland sparade rubriker" autocomplete="off" hidden>
+      <div class="archive-list" id="archive-list"></div>
+    </section>
 
     <main class="wrapper">
       <div class="format-group">
@@ -1559,12 +1606,193 @@
     }
 
     // -------------------------------------------------------------------------
-    // 6. Initiering
+    // 6. Lokalt rubrikarkiv: 5 sekunders paus, rullande 24 timmar
+    // -------------------------------------------------------------------------
+    const ARCHIVE_KEY = 'rubrikgranskaren.archive.v1';
+    const ARCHIVE_DELAY = 5000;
+    const ARCHIVE_MAX_AGE = 24 * 60 * 60 * 1000;
+    const ARCHIVE_MAX_ITEMS = 1000;
+    const ARCHIVE_VISIBLE_ITEMS = 100; // Visa högst 100 åt gången; sök i alla 1000.
+    const archivePanel = byId('archive-panel');
+    const archiveList = byId('archive-list');
+    const archiveCount = byId('archive-count');
+    const archiveToggle = byId('archive-toggle');
+    const archiveSearchToggle = byId('archive-search-toggle');
+    const archiveSearch = byId('archive-search');
+    const archiveTimers = new Map();
+    let archiveEntries = readArchive();
+
+    function readArchive() {
+      try {
+        const value = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
+        return Array.isArray(value) ? value.filter(item => item && typeof item.id === 'string' && typeof item.headline === 'string' && typeof item.deck === 'string' && Number.isFinite(item.savedAt)) : [];
+      } catch (error) {
+        console.warn('Arkivet kunde inte läsas:', error);
+        return [];
+      }
+    }
+
+    function pruneArchive() {
+      const cutoff = Date.now() - ARCHIVE_MAX_AGE;
+      archiveEntries = archiveEntries.filter(item => item.savedAt >= cutoff && headlineRecords.has(item.id))
+        .sort((a, b) => b.savedAt - a.savedAt).slice(0, ARCHIVE_MAX_ITEMS);
+    }
+
+    function persistArchive() {
+      pruneArchive();
+      try { localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveEntries)); }
+      catch (error) { console.warn('Arkivet kunde inte sparas:', error); }
+      if (!archivePanel.hidden) renderArchive();
+    }
+
+    function saveArchiveVersion(id) {
+      const record = headlineRecords.get(id);
+      if (!record) return;
+      const headline = record.field.value;
+      const deck = record.deck.value;
+      if (!headline.trim() && !deck.trim()) return;
+      // Undvik identiska på varandra följande versioner av samma fält.
+      const latest = archiveEntries.find(item => item.id === id);
+      if (latest && latest.headline === headline && latest.deck === deck) return;
+      archiveEntries.unshift({ id, headline, deck, savedAt: Date.now() });
+      persistArchive();
+    }
+
+    function scheduleArchiveSave(id) {
+      clearTimeout(archiveTimers.get(id));
+      archiveTimers.set(id, setTimeout(() => {
+        archiveTimers.delete(id);
+        saveArchiveVersion(id);
+      }, ARCHIVE_DELAY));
+    }
+
+    function restoreArchiveVersion(item) {
+      const record = headlineRecords.get(item.id);
+      if (!record) return;
+      clearTimeout(archiveTimers.get(item.id));
+      // Bevara aktuell version före återställning om den skiljer sig.
+      saveArchiveVersion(item.id);
+      record.field.value = item.headline;
+      record.deck.value = item.deck;
+      fitHeadline(record.field, record.maxSize);
+      // Öppna alternativfältet om den sparade rubriken hör dit.
+      if (item.id.endsWith('-alt')) {
+        const section = byId(`${item.id}-section`);
+        if (section && !section.classList.contains('is-open')) {
+          const button = document.querySelector(`[aria-controls="${item.id}-section"]`);
+          if (button) button.click();
+        }
+      }
+      activeSourceId = item.id;
+      record.field.focus();
+      updatePreview();
+      scheduleArchiveSave(item.id);
+      archivePanel.hidden = true;
+      archiveToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    // Beräkna en proportionellt nedskalad radbredd för arkivets rubrik.
+    // En dold kopia av originalfältet används så att den aktuella rubriken
+    // i redigeraren aldrig ändras. Arkivtexten förblir 17 px stor.
+    function archiveHeadlineWidth(item) {
+      const record = headlineRecords.get(item.id);
+      if (!record) return null;
+      const source = record.field;
+      const probe = source.cloneNode(false);
+      probe.removeAttribute('id');
+      probe.value = item.headline;
+      Object.assign(probe.style, {
+        position: 'absolute',
+        left: '-10000px',
+        top: '0',
+        visibility: 'hidden',
+        width: `${source.parentElement.getBoundingClientRect().width - 8}px`
+      });
+      document.body.appendChild(probe);
+      fitHeadline(probe, record.maxSize);
+      const fittedSize = parseFloat(getComputedStyle(probe).fontSize);
+      const sourceWidth = probe.clientWidth;
+      probe.remove();
+      if (!fittedSize || !sourceWidth) return null;
+      return Math.max(1, (sourceWidth - HEADLINE_MEASUREMENT_MARGIN) * 17 / fittedSize);
+    }
+
+    function renderArchive() {
+      pruneArchive();
+      archiveList.replaceChildren();
+      archiveCount.textContent = `${archiveEntries.length} versioner`;
+      if (!archiveEntries.length) {
+        const empty = document.createElement('span');
+        empty.textContent = 'Inga sparade rubriker ännu.';
+        archiveList.appendChild(empty);
+        return;
+      }
+      const formatter = new Intl.DateTimeFormat('sv-SE', { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
+      const query = archiveSearch.value.trim().toLocaleLowerCase('sv-SE');
+      const matches = query
+        ? archiveEntries.filter(item => item.headline.toLocaleLowerCase('sv-SE').includes(query))
+        : archiveEntries;
+      if (!matches.length) {
+        const empty = document.createElement('span');
+        empty.textContent = 'Inga matchande rubriker.';
+        archiveList.appendChild(empty);
+        return;
+      }
+      matches.slice(0, ARCHIVE_VISIBLE_ITEMS).forEach(item => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'archive-entry';
+        const meta = document.createElement('small');
+        meta.textContent = `${formatter.format(new Date(item.savedAt))} · ${item.id.replace(/-/g, ' ')}${item.id.endsWith('-alt') ? ' (alternativ)' : ''}`;
+        const headline = document.createElement('strong');
+        headline.textContent = item.headline || '(Ingen rubrik)';
+        const visualWidth = archiveHeadlineWidth(item);
+        if (visualWidth !== null) {
+          headline.style.width = `${visualWidth}px`;
+        }
+        const deck = document.createElement('span');
+        deck.textContent = item.deck;
+        button.append(meta, headline, deck);
+        button.addEventListener('click', () => restoreArchiveVersion(item));
+        archiveList.appendChild(button);
+      });
+    }
+
+    function initializeArchive() {
+      persistArchive();
+      archiveSearchToggle.addEventListener('click', () => {
+        const opening = archiveSearch.hidden;
+        archiveSearch.hidden = !opening;
+        archiveSearchToggle.setAttribute('aria-expanded', String(opening));
+        if (opening) archiveSearch.focus();
+        else { archiveSearch.value = ''; renderArchive(); }
+      });
+      archiveSearch.addEventListener('input', renderArchive);
+      archiveSearch.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          archiveSearchToggle.click();
+          archiveSearchToggle.focus();
+        }
+      });
+      archiveToggle.addEventListener('click', () => {
+        archivePanel.hidden = !archivePanel.hidden;
+        archiveToggle.setAttribute('aria-expanded', String(!archivePanel.hidden));
+        if (!archivePanel.hidden) renderArchive();
+      });
+      headlineRecords.forEach((record, id) => {
+        record.field.addEventListener('input', () => scheduleArchiveSave(id));
+        record.deck.addEventListener('input', () => scheduleArchiveSave(id));
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. Initiering
     // -------------------------------------------------------------------------
 
     function initialize() {
       BASE_FORMATS.forEach(buildFormat);
       headlineRecords.forEach(bindRecord);
+      initializeArchive();
 
       elements.previewToggle.addEventListener('click', toggleMainPreview);
       elements.previewLabel.addEventListener('click', () => elements.previewToggle.click());
