@@ -292,7 +292,8 @@
       color: #000;
     }
 
-    .copy-headline {
+    .copy-headline,
+    .clear-headline {
       display: inline-flex;
       flex: none;
       align-items: center;
@@ -308,14 +309,26 @@
       cursor: pointer;
     }
 
+    .clear-headline {
+      margin-left: 0;
+      color: #aaa;
+    }
+
+    .clear-headline:hover,
     .copy-headline:hover {
       color: var(--muted-text);
+    }
+
+    .clear-headline:focus-visible {
+      outline: 2px solid var(--muted-text);
+      outline-offset: 1px;
     }
 
     .copy-headline.copied {
       color: #238a61;
     }
 
+    .clear-headline svg,
     .copy-headline svg {
       width: 15px;
       height: 15px;
@@ -1111,6 +1124,32 @@
       return button;
     }
 
+    // Rensa bara det aktuella rubrikparet. Bevara versionen i arkivet först.
+    function createClearButton(field, deck, description) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'clear-headline';
+      button.title = 'Rensa rubrik och nedryck';
+      button.setAttribute('aria-label', `Rensa ${description} och nedryck`);
+      button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      button.addEventListener('pointerdown', event => event.preventDefault());
+      button.addEventListener('click', () => {
+        if (!field.value && !deck.value) return;
+        // Spara omedelbart: den normala femsekunderstimern kan ännu vara aktiv.
+        clearTimeout(archiveTimers.get(field.id));
+        archiveTimers.delete(field.id);
+        saveArchiveVersion(field.id);
+        field.value = '';
+        deck.value = '';
+        const record = headlineRecords.get(field.id);
+        if (record) fitHeadline(field, record.maxSize);
+        activeSourceId = field.id;
+        updatePreview();
+        field.focus({ preventScroll: true });
+      });
+      return button;
+    }
+
     async function copyText(value, sourceField) {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(value);
@@ -1171,7 +1210,8 @@
       heading.replaceChildren(
         headingButton,
         toggleButton,
-        createCopyButton(originalField, headingText)
+        createCopyButton(originalField, headingText),
+        createClearButton(originalField, originalDeck, headingText)
       );
 
       headingButton.addEventListener('click', () => toggleButton.click());
@@ -1201,7 +1241,8 @@
       alternativeLabel.className = 'label alternative-copy-heading';
       alternativeLabel.append(
         document.createTextNode('Alternativ'),
-        createCopyButton(alternativeField, `${headingText} alternativ`)
+        createCopyButton(alternativeField, `${headingText} alternativ`),
+        createClearButton(alternativeField, alternativeDeck, `${headingText} alternativ`)
       );
 
       const headlineBox = originalField.parentElement.cloneNode(false);
