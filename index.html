@@ -95,6 +95,20 @@
       color: var(--muted-text);
     }
 
+    /* Diskreta ikoner i sidhuvudets länkar. */
+    .contact .header-link-icon {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 3px;
+      vertical-align: -1px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     /* Arkiv: dolt tills användaren öppnar det. */
     .archive-trigger { border:0; padding:0; background:none; color:var(--muted-text); font:inherit; cursor:pointer; }
     .archive-trigger:hover { text-decoration:underline; }
@@ -782,16 +796,16 @@
     <aside class="sidebar">
       <div class="title">RUBRIKGRANSKARE</div>
       <div class="contact">
-        Beta 2.3 · <button type="button" class="archive-trigger" id="archive-toggle" aria-expanded="false" aria-controls="archive-panel">Arkiv</button> ·
+        <button type="button" class="archive-trigger" id="archive-toggle" aria-expanded="false" aria-controls="archive-panel"><svg class="header-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>Arkiv</button> ·
         <a
           class="help-link"
           href="https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/view"
           target="_blank"
           rel="noopener noreferrer"
           title="Se demonstrationsvideon i en ny flik"
-        >Nya funktioner</a>
+        ><svg class="header-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 13h7l-1 9 10-12h-7l1-8Z"/></svg>Nytt</a>
         · Contact:
-        <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a>
+        <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a> · Beta 2.3
       </div>
     </aside>
 
