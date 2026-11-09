@@ -374,11 +374,20 @@
     }
 
 
-    /* Rensa till vanster, kopiera ytterst till hoger – linjerar med nedryckets kopiera. */
+    /* Kopiera ligger kvar i samma lodrata linje som nedrycket.
+       Rensa placeras separat utanfor hogerkanten utan att flytta nagot annat. */
+    .format-heading,
+    .alternative-copy-heading { position: relative; }
     .format-heading .clear-headline,
-    .alternative-copy-heading .clear-headline { margin-left: auto; }
+    .alternative-copy-heading .clear-headline {
+      position: absolute;
+      right: -28px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0;
+    }
     .format-heading .copy-headline,
-    .alternative-copy-heading .copy-headline { margin-left: 0; }
+    .alternative-copy-heading .copy-headline { margin-left: auto; }
 
     /* Alternativa rubrikförslag. */
     .alternative-block {
