@@ -214,9 +214,11 @@
       line-height: 1;
     }
 
+    /* Diskretare textmarkor i rubrikfalten; storleken styrs av typsnittet. */
     textarea.regular,
     textarea.large,
     textarea.xl {
+      caret-color: #aaa;
       white-space: normal;
       word-break: normal;
       overflow-wrap: normal;
@@ -263,6 +265,7 @@
       font-size: 14px;
       font-style: italic;
     }
+
 
     /* Gemensamma klickbara etiketter och små kontroller. */
     .clickable-heading {
@@ -809,7 +812,37 @@
     body.focus-mode .focus-only { display: block; }
     textarea.xl[data-lines='1'] { height: 74px; }
 
-    .mode-control { display: inline-flex; align-items: center; gap: 7px; }
+    .mode-control { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+    /* Test: liten pil UTANFOR till vanster om Fokus, utan layoutforskjutning. */
+    .focus-discovery-arrow {
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      width: 20px;
+      height: 14px;
+      transform: translateY(-50%);
+      color: #222;
+      pointer-events: none;
+    }
+    .focus-discovery-arrow svg {
+      display: block;
+      width: 20px;
+      height: 14px;
+      overflow: visible;
+      animation: none;
+    }
+    .focus-discovery-arrow.is-animating svg {
+      animation: focus-arrow-slide 3.5s ease-in-out infinite;
+    }
+    .focus-discovery-arrow[hidden],
+    body.focus-mode .focus-discovery-arrow { display: none; }
+    @keyframes focus-arrow-slide {
+      0%, 15%, 100% { transform: translateX(-7px); }
+      65%, 85% { transform: translateX(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .focus-discovery-arrow svg { animation: none; }
+    }
     .mode-label { border: 0; background: none; padding: 0; color: inherit;
                   font: inherit; cursor: pointer; }
     .mode-switch { display: inline-flex; align-items: center; width: 30px;
@@ -829,6 +862,25 @@
         transition: none;
       }
     }
+
+
+    /* Engangsintroduktion for Fokus, utan ram eller bakgrundsplatta. */
+    .focus-intro {
+      margin-top: 24px;
+      max-width: 375px;
+      color: #555;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .focus-intro[hidden] { display: none; }
+    .focus-intro-title {
+      margin: 0 0 10px;
+      font-size: 21px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+    .focus-intro p { margin: 0; }
 
     /* Info: diskret videofonster utan ram, ovanpa arbetsytan. */
     .video-popover {
@@ -877,6 +929,7 @@
       <div class="title">RUBRIKGRANSKARE</div>
       <div class="contact">
         <span class="mode-control">
+          <span class="focus-discovery-arrow" id="focus-discovery-arrow" aria-hidden="true" hidden><svg viewBox="0 0 24 16"><path d="M1 8H20M14 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <button type="button" class="mode-label" id="focus-label" title="Växla mellan Översikt och Fokus">Fokus</button>
           <button type="button" class="mode-switch" id="focus-toggle" role="switch"
                   aria-checked="false" aria-label="Fokusläge av" title="Visa endast 1, 2 och 3 rader"></button>
@@ -1077,7 +1130,7 @@
       </div>
 
       <div class="side-crop-controls" id="side-crop-controls" hidden>
-        <label for="side-crop-slider">Bildutsnitt</label>
+        <label for="side-crop-slider" title="Vänster">V</label>
         <input
           type="range"
           id="side-crop-slider"
@@ -1088,6 +1141,11 @@
           aria-label="Bildutsnitt, vänster till höger"
           aria-valuetext="Mitten"
         >
+        <span title="Höger" aria-hidden="true">H</span>
+      </div>
+      <div class="focus-intro" id="focus-intro" hidden aria-label="Introduktion till Fokus">
+        <div class="focus-intro-title">Ny vy: Fokus</div>
+        <p>Sätt rubrik på 1, 2 eller 3 rader i valfri storlek. Tänk på att storleken ska spegla nyhetsvärdet.</p>
       </div>
     </section>
   </div>
@@ -1972,11 +2030,59 @@
     // Fokus är ett visningsläge, inte en ny uppsättning kopior av XL-fälten.
     // Alla texter och nedryck behålls när läget växlas.
     const FOCUS_STORAGE_KEY = 'rubrikgranskaren.focus-mode.v1';
+    const FOCUS_DISCOVERY_DONE_KEY = 'rubrikgranskaren.focus-arrow-used.v1';
+    const FOCUS_ARROW_DURATION_MS = 60000;
+    const FOCUS_INTRO_SEEN_KEY = 'rubrikgranskaren.focus-intro-seen.v1';
+    const focusIntro = byId('focus-intro');
+    let focusIntroTimer = null;
+    let initializingFocusMode = false;
+
+    function hideFocusIntro() {
+      clearTimeout(focusIntroTimer);
+      focusIntroTimer = null;
+      focusIntro.hidden = true;
+    }
+
+    function showFocusIntroOnce() {
+      let alreadySeen = false;
+      try { alreadySeen = localStorage.getItem(FOCUS_INTRO_SEEN_KEY) === '1'; }
+      catch (error) { /* Lokal lagring kan vara blockerad. */ }
+      if (alreadySeen) return;
+      try { localStorage.setItem(FOCUS_INTRO_SEEN_KEY, '1'); }
+      catch (error) { console.warn('Kunde inte spara Fokus-introduktion', error); }
+      focusIntro.hidden = false;
+      focusIntroTimer = setTimeout(hideFocusIntro, 60000);
+    }
+
+    const focusDiscoveryArrow = byId('focus-discovery-arrow');
+    let focusArrowTimer = null;
+
+    function stopFocusArrowForever() {
+      clearTimeout(focusArrowTimer);
+      focusDiscoveryArrow.classList.remove('is-animating');
+      focusDiscoveryArrow.hidden = true;
+      try { localStorage.setItem(FOCUS_DISCOVERY_DONE_KEY, '1'); }
+      catch (error) { console.warn('Kunde inte spara Fokus-introduktion', error); }
+    }
+
+    function startFocusArrow() {
+      focusDiscoveryArrow.hidden = false;
+      focusDiscoveryArrow.classList.add('is-animating');
+      focusArrowTimer = setTimeout(() => {
+        focusDiscoveryArrow.classList.remove('is-animating');
+      }, FOCUS_ARROW_DURATION_MS);
+    }
     const focusToggle = byId('focus-toggle');
     const focusLabel = byId('focus-label');
     const focusGroups = ['xl-2', 'xl-3'];
 
     function setFocusMode(enabled) {
+      if (enabled) {
+        stopFocusArrowForever();
+        if (!initializingFocusMode) showFocusIntroOnce();
+      } else {
+        hideFocusIntro();
+      }
       const wasFocused = document.activeElement;
       const oldActive = activeSourceId;
       const previousScrollY = window.scrollY;
@@ -2023,7 +2129,18 @@
       let saved = false;
       try { saved = localStorage.getItem(FOCUS_STORAGE_KEY) === '1'; }
       catch (error) { /* Privat läge eller blockerad lagring. */ }
-      if (saved) setFocusMode(true);
+      if (saved) {
+        // Redan anvant Fokus i en tidigare version.
+        stopFocusArrowForever();
+        initializingFocusMode = true;
+        setFocusMode(true);
+        initializingFocusMode = false;
+      } else {
+        let alreadyUsed = false;
+        try { alreadyUsed = localStorage.getItem(FOCUS_DISCOVERY_DONE_KEY) === '1'; }
+        catch (error) { /* Lagring kan vara blockerad. */ }
+        if (!alreadyUsed) startFocusArrow();
+      }
     }
 
 
