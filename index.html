@@ -14,7 +14,7 @@
 
   <style>
     /*
-     * Rubrikgranskaren Beta 2.3
+     * Rubrikgranskaren v2.3
      *
      * Kalibrerade mått som inte bör ändras utan visuell kontroll mot sajten:
      * - Standardrubrik: 375 px
@@ -56,6 +56,10 @@
       color: #000;
       font-family: ABMonument, sans-serif;
     }
+
+    /* Behall horisontell position nar Fokus andrar sidans hojd. */
+    html { scrollbar-gutter: stable; }
+    .layout { overflow-anchor: none; }
 
     /* Sidhuvud och tvåspaltslayout. */
     .layout {
@@ -175,6 +179,15 @@
 
     .deck-box {
       width: var(--deck-width);
+      position: relative;
+    }
+
+    /* Kopiera nedryck: ikonen ligger utanför textytan och ändrar inte radbrytning. */
+    .copy-deck {
+      position: absolute;
+      left: calc(100% + 4px);
+      top: 0;
+      margin-left: 0;
     }
 
     .box-gap {
@@ -279,7 +292,8 @@
       outline-offset: 2px;
     }
 
-    .copy-headline:focus-visible {
+    .copy-headline:focus-visible,
+    .copy-deck:focus-visible {
       outline: 2px solid var(--muted-text);
       outline-offset: 1px;
     }
@@ -297,16 +311,17 @@
       padding: 12px 14px 12px 6px;
       border: 0;
       background: transparent;
-      color: var(--muted-text);
+      color: #aaa;
       cursor: pointer;
-      font: 20px / 1 Arial, sans-serif;
+      font: 18px / 1 Arial, sans-serif;
     }
 
     .variant-button:hover {
-      color: #000;
+      color: var(--muted-text);
     }
 
     .copy-headline,
+    .copy-deck,
     .clear-headline {
       display: inline-flex;
       flex: none;
@@ -329,7 +344,8 @@
     }
 
     .clear-headline:hover,
-    .copy-headline:hover {
+    .copy-headline:hover,
+    .copy-deck:hover {
       color: var(--muted-text);
     }
 
@@ -338,12 +354,14 @@
       outline-offset: 1px;
     }
 
-    .copy-headline.copied {
+    .copy-headline.copied,
+    .copy-deck.copied {
       color: #238a61;
     }
 
     .clear-headline svg,
-    .copy-headline svg {
+    .copy-headline svg,
+    .copy-deck svg {
       width: 15px;
       height: 15px;
       fill: none;
@@ -417,10 +435,6 @@
       margin: 0 0 4px 2px;
       color: var(--muted-text);
       font: 13px Arial, sans-serif;
-    }
-
-    .preview-status {
-      min-width: 16px;
     }
 
     .preview-toggle {
@@ -782,11 +796,70 @@
       background: #eeeeea;
     }
 
+    /* Fokus: samma XL-redigerare som i översikten, men bara 1/2/3 rader. */
+    .focus-only { display: none; }
+    body.focus-mode .overview-only { display: none; }
+    body.focus-mode .focus-only { display: block; }
+    textarea.xl[data-lines='1'] { height: 74px; }
+
+    .mode-control { display: inline-flex; align-items: center; gap: 7px; }
+    .mode-label { border: 0; background: none; padding: 0; color: inherit;
+                  font: inherit; cursor: pointer; }
+    .mode-switch { display: inline-flex; align-items: center; width: 30px;
+                   height: 17px; padding: 2px; border: 0; border-radius: 20px;
+                   background: #aaa; cursor: pointer; vertical-align: middle; }
+    .mode-switch::after { content: ''; width: 13px; height: 13px;
+                          border-radius: 50%; background: white; transition: transform .12s; }
+    .mode-switch[aria-checked='true'] { background: #238a61; }
+    .mode-switch[aria-checked='true']::after { transform: translateX(13px); }
+    .mode-switch:focus-visible, .mode-label:focus-visible {
+      outline: 2px solid var(--focus-color); outline-offset: 3px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .alternative-block,
       .alternative-block-inner {
         transition: none;
       }
+    }
+
+    /* Info: diskret videofonster utan ram, ovanpa arbetsytan. */
+    .video-popover {
+      position: fixed;
+      z-index: 50;
+      width: min(834px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      padding: 8px;
+      background: var(--page-background);
+      box-shadow: 0 5px 22px rgba(0, 0, 0, .16);
+    }
+    .video-popover[hidden] { display: none; }
+    .video-popover-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: var(--muted-text);
+      font: 13px Arial, sans-serif;
+    }
+    .video-popover-close {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      background: transparent;
+      color: var(--muted-text);
+      font: 20px Arial, sans-serif;
+      cursor: pointer;
+    }
+    .video-popover-close:hover { color: #000; }
+    .video-popover iframe {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: calc(100vh - 95px);
+      border: 0;
+      background: #eee;
     }
   </style>
 </head>
@@ -796,16 +869,23 @@
     <aside class="sidebar">
       <div class="title">RUBRIKGRANSKARE</div>
       <div class="contact">
+        <span class="mode-control">
+          <button type="button" class="mode-label" id="focus-label" title="Växla mellan Översikt och Fokus">Fokus</button>
+          <button type="button" class="mode-switch" id="focus-toggle" role="switch"
+                  aria-checked="false" aria-label="Fokusläge av" title="Visa endast 1, 2 och 3 rader"></button>
+        </span> ·
         <button type="button" class="archive-trigger" id="archive-toggle" aria-expanded="false" aria-controls="archive-panel"><svg class="header-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>Arkiv</button> ·
         <a
           class="help-link"
+          id="video-trigger"
           href="https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/view"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Se demonstrationsvideon i en ny flik"
-        ><svg class="header-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 13h7l-1 9 10-12h-7l1-8Z"/></svg>Nytt</a>
+          aria-expanded="false"
+          aria-controls="video-popover"
+          title="Visa demonstrationsvideo"
+        ><svg class="header-link-icon" viewBox="0 0 24 24" aria-hidden="true" style="color:#999;stroke-width:1.4"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.5 1.8c-.8.7-2.1 1.3-2.1 2.7"/><path d="M12 17.3h.01"/></svg>Info</a>
+
         · Contact:
-        <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a> · Beta 2.3
+        <a href="mailto:joakim.ottosson@schibsted.com">Joakim Ottosson</a> · v2.3
       </div>
     </aside>
 
@@ -824,7 +904,7 @@
     </section>
 
     <main class="wrapper">
-      <div class="format-group">
+      <div class="format-group overview-only">
         <div class="label">Regular · 2 rader</div>
         <div class="box regular-box box-gap">
           <textarea class="regular" id="regular-2"></textarea>
@@ -834,7 +914,7 @@
         </div>
       </div>
 
-      <div class="format-group">
+      <div class="format-group overview-only">
         <div class="label">Large · 2 rader</div>
         <div class="box">
           <textarea class="large" data-lines="2" id="large-2"></textarea>
@@ -844,13 +924,23 @@
         </div>
       </div>
 
-      <div class="format-group">
+      <div class="format-group overview-only">
         <div class="label">Large · 3 rader</div>
         <div class="box">
           <textarea class="large" data-lines="3" id="large-3"></textarea>
         </div>
         <div class="deck-box deck-gap">
           <textarea class="decktext" id="deck-3" placeholder="nedryck"></textarea>
+        </div>
+      </div>
+
+      <div class="format-group focus-only" id="focus-one-group">
+        <div class="label">1 rad</div>
+        <div class="box">
+          <textarea class="xl" data-lines="1" id="focus-1"></textarea>
+        </div>
+        <div class="deck-box deck-gap">
+          <textarea class="decktext" id="deck-focus-1" placeholder="nedryck"></textarea>
         </div>
       </div>
 
@@ -884,7 +974,6 @@
           aria-controls="preview"
           title="Slå på eller av förhandsvisning"
         >Puff · Förhandsvisning</button>
-        <span class="preview-status" id="preview-status" aria-hidden="true">Av</span>
         <button
           type="button"
           class="preview-toggle"
@@ -996,6 +1085,16 @@
     </section>
   </div>
 
+
+  <!-- Fyll iframe.src forst nar anvandaren oppnar videon. -->
+  <aside class="video-popover" id="video-popover" hidden aria-label="Demonstrationsvideo">
+    <div class="video-popover-heading">
+      <span>Info om Rubrikgranskaren</span>
+      <button type="button" class="video-popover-close" id="video-close" aria-label="Stang video" title="Stang">×</button>
+    </div>
+    <iframe id="video-frame" title="Demonstrationsvideo" allow="autoplay; fullscreen" allowfullscreen></iframe>
+  </aside>
+
   <script>
     'use strict';
 
@@ -1017,6 +1116,7 @@
       { id: 'regular-2', deckId: 'deck-1', maxSize: 44 },
       { id: 'large-2', deckId: 'deck-2', maxSize: 54 },
       { id: 'large-3', deckId: 'deck-3', maxSize: 54 },
+      { id: 'focus-1', deckId: 'deck-focus-1', maxSize: 74 },
       { id: 'xl-2', deckId: 'deck-4', maxSize: 74 },
       { id: 'xl-3', deckId: 'deck-5', maxSize: 74 }
     ];
@@ -1045,7 +1145,6 @@
     const elements = {
       preview: byId('preview'),
       previewLabel: byId('preview-label'),
-      previewStatus: byId('preview-status'),
       previewToggle: byId('toggle-preview'),
       previewTitle: byId('preview-title'),
       previewDeck: byId('preview-deck'),
@@ -1102,11 +1201,11 @@
       headlineRecords.set(field.id, { field, deck, maxSize });
     }
 
-    function createCopyButton(field, description) {
+    function createCopyButton(field, description, isDeck = false) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'copy-headline';
-      button.title = 'Kopiera rubrik';
+      button.className = isDeck ? 'copy-headline copy-deck' : 'copy-headline';
+      button.title = isDeck ? 'Kopiera nedryck' : 'Kopiera rubrik';
       button.setAttribute('aria-label', `Kopiera ${description}`);
       button.innerHTML = COPY_ICON;
 
@@ -1127,7 +1226,7 @@
           feedbackTimer = setTimeout(() => {
             button.classList.remove('copied');
             button.innerHTML = COPY_ICON;
-            button.title = 'Kopiera rubrik';
+            button.title = isDeck ? 'Kopiera nedryck' : 'Kopiera rubrik';
           }, 1100);
         } catch (error) {
           button.title = 'Kunde inte kopiera';
@@ -1228,6 +1327,11 @@
         createClearButton(originalField, originalDeck, headingText)
       );
 
+      // Separat kopiering av nedrycket, i utrymmet till höger om dess fält.
+      originalDeck.parentElement.appendChild(
+        createCopyButton(originalDeck, `nedryck för ${headingText}`, true)
+      );
+
       headingButton.addEventListener('click', () => toggleButton.click());
 
       const section = document.createElement('div');
@@ -1264,6 +1368,9 @@
 
       const deckBox = originalDeck.parentElement.cloneNode(false);
       deckBox.appendChild(alternativeDeck);
+      deckBox.appendChild(
+        createCopyButton(alternativeDeck, `nedryck för ${headingText} alternativ`, true)
+      );
 
       sectionInner.append(alternativeLabel, headlineBox, deckBox);
       section.appendChild(sectionInner);
@@ -1445,7 +1552,6 @@
       elements.preview.hidden = !shouldShow;
       elements.sideToggleRow.hidden = !shouldShow;
       elements.previewToggle.setAttribute('aria-checked', String(shouldShow));
-      elements.previewStatus.textContent = shouldShow ? 'På' : 'Av';
       syncSidePreviewVisibility();
 
       if (shouldShow) {
@@ -1724,6 +1830,10 @@
     function restoreArchiveVersion(item) {
       const record = headlineRecords.get(item.id);
       if (!record) return;
+      // Enradsläget finns bara i Fokus. Växla dit före återställning.
+      if (item.id.startsWith('focus-1') && !document.body.classList.contains('focus-mode')) {
+        setFocusMode(true);
+      }
       clearTimeout(archiveTimers.get(item.id));
       // Bevara aktuell version före återställning om den skiljer sig.
       saveArchiveVersion(item.id);
@@ -1852,10 +1962,110 @@
     // 7. Initiering
     // -------------------------------------------------------------------------
 
+    // Fokus är ett visningsläge, inte en ny uppsättning kopior av XL-fälten.
+    // Alla texter och nedryck behålls när läget växlas.
+    const FOCUS_STORAGE_KEY = 'rubrikgranskaren.focus-mode.v1';
+    const focusToggle = byId('focus-toggle');
+    const focusLabel = byId('focus-label');
+    const focusGroups = ['xl-2', 'xl-3'];
+
+    function setFocusMode(enabled) {
+      const wasFocused = document.activeElement;
+      const oldActive = activeSourceId;
+      const previousScrollY = window.scrollY;
+      document.body.classList.toggle('focus-mode', enabled);
+      focusToggle.setAttribute('aria-checked', String(enabled));
+      focusToggle.setAttribute('aria-label', enabled ? 'Fokusläge på' : 'Fokusläge av');
+      focusToggle.title = enabled ? 'Visa alla rubrikformat' : 'Visa endast 1, 2 och 3 rader';
+
+      // Etiketterna ändras, men de kalibrerade XL-fälten ändras inte.
+      for (const [id, label] of [['xl-2', '2 rader'], ['xl-3', '3 rader']]) {
+        const group = byId(id).closest('.format-group');
+        const heading = group.querySelector('.clickable-heading');
+        if (heading) heading.textContent = enabled ? label : `XL · ${label}`;
+      }
+
+      // Om ett dolt fält var aktivt, visa i stället det befintliga XL-fältet.
+      if (enabled && !['focus-1', ...focusGroups,
+          'focus-1-alt', 'xl-2-alt', 'xl-3-alt'].includes(oldActive)) {
+        activeSourceId = 'xl-2';
+      }
+      if (!enabled && oldActive.startsWith('focus-1')) {
+        activeSourceId = 'xl-2';
+      }
+      if (enabled && wasFocused instanceof HTMLElement &&
+          wasFocused.closest('.overview-only')) {
+        byId('xl-2').focus({ preventScroll: true });
+      }
+      try { localStorage.setItem(FOCUS_STORAGE_KEY, enabled ? '1' : '0'); }
+      catch (error) { console.warn('Kunde inte spara arbetsläge', error); }
+      // Halla kvar anvandarens scrollposition (sa langt nya sidhojden tillater).
+      // Motverkar Chromes scroll anchoring nar fem falt blir tre.
+      window.scrollTo({ top: previousScrollY, behavior: 'instant' });
+      requestAnimationFrame(() => {
+        recalculateAllHeadlines();
+        updatePreview();
+        window.scrollTo({ top: previousScrollY, behavior: 'instant' });
+      });
+    }
+
+    function initializeFocusMode() {
+      focusToggle.addEventListener('click', () =>
+        setFocusMode(!document.body.classList.contains('focus-mode')));
+      focusLabel.addEventListener('click', () => focusToggle.click());
+      let saved = false;
+      try { saved = localStorage.getItem(FOCUS_STORAGE_KEY) === '1'; }
+      catch (error) { /* Privat läge eller blockerad lagring. */ }
+      if (saved) setFocusMode(true);
+    }
+
+
+    // Demonstrationsvideon oppnas vid Info utan att lamna redigeringsytan.
+    function initializeVideoPopover() {
+      const trigger = byId('video-trigger');
+      const panel = byId('video-popover');
+      const frame = byId('video-frame');
+      const closeButton = byId('video-close');
+      const embedUrl = 'https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/preview';
+
+      function positionPanel() {
+        // Centrera det stora videofönstret inom det synliga webbläsarfönstret.
+        const rect = panel.getBoundingClientRect();
+        panel.style.left = `${Math.max(12, (window.innerWidth - rect.width) / 2)}px`;
+        panel.style.top = `${Math.max(12, (window.innerHeight - rect.height) / 2)}px`;
+      }
+
+      function closeVideo() {
+        if (panel.hidden) return;
+        panel.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        frame.removeAttribute('src'); // Stoppa uppspelningen nar fonstret stangs.
+      }
+
+      trigger.addEventListener('click', event => {
+        event.preventDefault();
+        if (!panel.hidden) { closeVideo(); return; }
+        panel.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        frame.src = embedUrl;
+        positionPanel();
+      });
+      closeButton.addEventListener('click', closeVideo);
+      document.addEventListener('pointerdown', event => {
+        if (!panel.hidden && !panel.contains(event.target) && !trigger.contains(event.target)) closeVideo();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeVideo();
+      });
+      window.addEventListener('resize', () => { if (!panel.hidden) positionPanel(); });
+    }
+
     function initialize() {
       BASE_FORMATS.forEach(buildFormat);
       headlineRecords.forEach(bindRecord);
       initializeArchive();
+      initializeFocusMode();
+      initializeVideoPopover();
 
       elements.previewToggle.addEventListener('click', toggleMainPreview);
       elements.previewLabel.addEventListener('click', () => elements.previewToggle.click());
