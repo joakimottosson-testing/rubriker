@@ -370,6 +370,13 @@
       stroke-linejoin: round;
     }
 
+
+    /* Rensa till vanster, kopiera ytterst till hoger – linjerar med nedryckets kopiera. */
+    .format-heading .clear-headline,
+    .alternative-copy-heading .clear-headline { margin-left: auto; }
+    .format-heading .copy-headline,
+    .alternative-copy-heading .copy-headline { margin-left: 0; }
+
     /* Alternativa rubrikförslag. */
     .alternative-block {
       display: grid;
@@ -1323,8 +1330,8 @@
       heading.replaceChildren(
         headingButton,
         toggleButton,
-        createCopyButton(originalField, headingText),
-        createClearButton(originalField, originalDeck, headingText)
+        createClearButton(originalField, originalDeck, headingText),
+        createCopyButton(originalField, headingText)
       );
 
       // Separat kopiering av nedrycket, i utrymmet till höger om dess fält.
@@ -1359,8 +1366,8 @@
       alternativeLabel.className = 'label alternative-copy-heading';
       alternativeLabel.append(
         document.createTextNode('Alternativ'),
-        createCopyButton(alternativeField, `${headingText} alternativ`),
-        createClearButton(alternativeField, alternativeDeck, `${headingText} alternativ`)
+        createClearButton(alternativeField, alternativeDeck, `${headingText} alternativ`),
+        createCopyButton(alternativeField, `${headingText} alternativ`)
       );
 
       const headlineBox = originalField.parentElement.cloneNode(false);
@@ -2026,7 +2033,7 @@
       const panel = byId('video-popover');
       const frame = byId('video-frame');
       const closeButton = byId('video-close');
-      const embedUrl = 'https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/preview';
+      const embedUrl = 'https://drive.google.com/file/d/1SWDvGUG_xaz2xifz8poDpf90jYG_v-7D/preview?autoplay=1&mute=1';
 
       function positionPanel() {
         // Centrera det stora videofönstret inom det synliga webbläsarfönstret.
