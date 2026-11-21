@@ -389,6 +389,26 @@
     .format-heading .copy-headline,
     .alternative-copy-heading .copy-headline { margin-left: auto; }
 
+
+    /* Tillfallig hopfallning av format i Classic; inget sparas. */
+    body:not(.focus-mode) .format-group.is-collapsed > .box,
+    body:not(.focus-mode) .format-group.is-collapsed > .deck-box,
+    body:not(.focus-mode) .format-group.is-collapsed > .alternative-block { display: none; }
+    .collapse-format {
+      flex: none; border: 0; background: transparent; color: #999;
+      font: 17px/1 Arial, sans-serif; cursor: pointer;
+      width: 18px; height: 24px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .collapse-format svg {
+      width: 14px; height: 14px; fill: none; stroke: currentColor;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+    body.focus-mode .collapse-format { display: none; }
+    .collapse-format:hover { color: #555; }
+    .collapse-format:focus-visible { outline: 2px solid #555; }
+    body:not(.focus-mode) .format-group.is-collapsed .format-heading { margin-bottom: 0; }
+
     /* Alternativa rubrikförslag. */
     .alternative-block {
       display: grid;
@@ -1363,8 +1383,30 @@
       toggleButton.setAttribute('aria-expanded', 'false');
       toggleButton.setAttribute('aria-controls', `${alternativeId}-section`);
 
+      // Enbart Classic: dolj/visa hela formatet under aktuell sidladdning.
+      // Text och nedryck ligger kvar i DOM och bevaras vid ateroppning.
+      const collapseButton = document.createElement('button');
+      collapseButton.type = 'button';
+      collapseButton.className = 'collapse-format';
+      collapseButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>';
+      collapseButton.title = 'Fäll ihop formatet';
+      collapseButton.setAttribute('aria-label', `Fäll ihop ${headingText}`);
+      collapseButton.setAttribute('aria-expanded', 'true');
+      collapseButton.addEventListener('click', () => {
+        const collapsed = group.classList.toggle('is-collapsed');
+        collapseButton.innerHTML = collapsed
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>';
+        collapseButton.title = collapsed ? 'Fäll ut formatet' : 'Fäll ihop formatet';
+        collapseButton.setAttribute('aria-label', `${collapsed ? 'Fäll ut' : 'Fäll ihop'} ${headingText}`);
+        collapseButton.setAttribute('aria-expanded', String(!collapsed));
+        if (collapsed && group.contains(document.activeElement)) {
+          collapseButton.focus({ preventScroll: true });
+        }
+      });
       heading.classList.add('format-heading');
       heading.replaceChildren(
+        ...(group.classList.contains('focus-only') ? [] : [collapseButton]),
         headingButton,
         toggleButton,
         createClearButton(originalField, originalDeck, headingText),
